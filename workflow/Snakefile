@@ -1,0 +1,61 @@
+# SLAM-Seq data analysis (SlamDunk) for paired-end reads
+
+import os
+import pandas as pd
+import requests
+import urllib3
+from snakemake.utils import min_version
+from snakemake.logging import logger
+# Minimal version of snakemake
+min_version('6.8.0')
+
+# Necessary to handle HTTP remote to download reference genome
+requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'ALL:@SECLEVEL=1'
+
+# Load and read Snakemake config 
+configfile: "config/config_template.yaml"
+
+data_dir = config["samples"]["dir"]
+
+PROJECT = config["proj"]
+GENOME = config["genome_build"]
+SAMPLE = config["samples"]["manifest"]
+SAMPLE_MANIFEST = pd.read_table(SAMPLE).set_index("Label") #set index indicates the label
+LABELS = list(SAMPLE_MANIFEST.index)
+
+def raw_fastq_identifiers_to_label(label):
+    row = SAMPLE_MANIFEST.loc[label]
+    sample_dir = row["Sample_ID"]
+    identifier = row["Sample_Name"] # indicates prefix for .fastq
+    sample_num = row["Sample_Num"]
+    return [f"{data_dir}/{sample_dir}/{identifier}_S{sample_num}_L002_R1_001.fastq.gz", 
+            f"{data_dir}/{sample_dir}/{identifier}_S{sample_num}_L002_R2_001.fastq.gz"]  # change location of input fastq files
+          
+
+def read_sample_manifes(label):
+    row = SAMPLE_MANIFEST.loc[lims]
+
+
+# Import rules (order of use)
+include: "rules/trim_galore.smk"
+include: "rules/BED_file.smk"
+include: "rules/slamdunk_steps.smk"
+include: "rules/format_counts.smk"
+include: "rules/plots.smk"
+include: "rules/conversion_rates.smk"
+include: "rules/alleyoop.smk"
+
+
+
+rule all:
+    input:
+        # expand("results/{proj}/slamdunk/filter/{label}_mapped_filtered.bam", proj=PROJECT, label=LABELS)
+        # expand("results/{proj}/slamdunk/count/{label}_mapped_filtered_tcount.tsv", proj=PROJECT, label=LABELS)
+        expand("results/{proj}/alleyoop/rates/{label}_mapped_filtered_overallrates.csv", proj=PROJECT, label=LABELS),
+        expand("results/{proj}/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.csv", proj=PROJECT, label=LABELS),
+        # expand("results/{proj}/alleyoop/dedup/{label}_mapped_filtered_dedup.bam", proj=PROJECT, label=LABELS),
+        # expand("results/{proj}/plots/allSamples_TCReadsPercent_barplot.pdf", proj=PROJECT),
+        expand("results/{proj}/plots/{label}/TCReads_vs_Steady.pdf", proj=PROJECT, label=LABELS)
+        # expand("results/{proj}/plots/{label}_transcriptRates_boxplot.pdf", proj=PROJECT, label=LABELS)
+        # expand("results/{proj}/alleyoop/utrrates/{label}_convrates_by_gene.tsv", proj=PROJECT, label=LABELS)
+

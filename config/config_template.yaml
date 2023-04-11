@@ -1,0 +1,38 @@
+# proj: "Test_Exons_NoScaffold_NoPseudo"
+proj: "Test_Exons_TC2_Other"
+data_dir: "HL_slam_seq_test_20220803"
+
+samples:
+    dir: "/home/ife/paulina.rosales/data/HL_slam_seq_test_20220803"
+    limsCSV: "/home/ife/paulina.rosales/data/HL_slam_seq_test_20220803/Project_469_lims.csv"
+    manifest: "/home/ife/paulina.rosales/data/HL_slam_seq_test_20220803/sample_manifest.tsv"
+
+# Genome infoNoScaffold
+genome_build: "m39"    #human=hg38, mouse=m39
+gencode_version: "31" # human=38, mouse=31
+ensembl_version: 108
+GTF_file: "/home/ife/paulina.rosales/data/genome/m39/Mus_musculus.GRCm39.108.gtf.gz"
+BED_file: "all-genes" # OPTIONS:  all-genes, exons, introns, 3-utr
+rawEnhancersTSV: "/home/ife/paulina.rosales/data/genome/m39/m39_SuperEnhancers.tsv"
+RawData_dir: "/home/ife/paulina.rosales/data/genome/m39"
+# Raw processing
+trim_galore:
+    # quality_score: 28
+    length: 20
+    clip_5: 1
+    clip_3: 1
+    quality: "-q 28"
+    extra_params: ""
+    # extra_params: "--paired --2colour 28"
+slam:
+    max_len: 100
+    # count
+    conversion_threshold: 2 # -c 
+    min_qual: 27 # min base quality for T -> C conversions (default:27)
+    # snp
+    variant_fraction: 0.2 # for diploids = 0.2
+# DE Analysis
+transformation: "vst" # only log2, vst or rlog
+threshold:
+    log2FC: 1
+    padj: 0.05
