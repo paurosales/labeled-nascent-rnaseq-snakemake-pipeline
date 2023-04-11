@@ -1,9 +1,9 @@
 # Handle wildcards errors
 def _input_refGenome(wildcards):
-    return expand('external/gencode/Mus_musculus.GRC{genome}.primary_assembly.genome.fa', genome=GENOME)
+    return expand('resources/external/gencode/Mus_musculus.GRC{genome}.primary_assembly.genome.fa', genome=GENOME)
 
 def _input_bedFile(wildcards):
-    return expand('external/gencode/Mus_musculus.GRC{genome}.transcripts.bed', genome=GENOME)
+    return expand('resources/external/gencode/Mus_musculus.GRC{genome}.transcripts.bed', genome=GENOME)
 
 
 
