@@ -8,22 +8,17 @@ samples:
     manifest: "/home/ife/paulina.rosales/data/HL_slam_seq_test_20220803/sample_manifest.tsv"
 
 # Genome infoNoScaffold
-genome_build: "m39"    #human=hg38, mouse=m39
-gencode_version: "31" # human=38, mouse=31
+genome_build: "m38"    #human=hg38, mouse=m38
+gencode_version: "25" # human=38, mouse=25
 ensembl_version: 108
-GTF_file: "/home/ife/paulina.rosales/data/genome/m39/Mus_musculus.GRCm39.108.gtf.gz"
-BED_file: "all-genes" # OPTIONS:  all-genes, exons, introns, 3-utr
-rawEnhancersTSV: "/home/ife/paulina.rosales/data/genome/m39/m39_SuperEnhancers.tsv"
-RawData_dir: "/home/ife/paulina.rosales/data/genome/m39"
+
 # Raw processing
 trim_galore:
-    # quality_score: 28
     length: 20
     clip_5: 1
     clip_3: 1
-    quality: "-q 28"
+    quality: "-q 28" # --2colour 28 
     extra_params: ""
-    # extra_params: "--paired --2colour 28"
 slam:
     max_len: 100
     # count

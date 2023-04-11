@@ -38,12 +38,12 @@ def read_sample_manifes(label):
 
 # Import rules (order of use)
 include: "rules/trim_galore.smk"
-include: "rules/BED_file.smk"
-include: "rules/slamdunk_steps.smk"
-include: "rules/format_counts.smk"
-include: "rules/plots.smk"
+include: "rules/fetch_refseq.smk"
+include: "rules/mapping.smk"
+include: "rules/read_counts.smk"
+# include: "rules/format_counts.smk"
+# include: "rules/plots.smk"
 include: "rules/conversion_rates.smk"
-include: "rules/alleyoop.smk"
 
 
 
