@@ -52,6 +52,11 @@ removed <-  removed -  nrow(collapsedCounts)
 cat(paste("Collapsed all read counts data contains", nrow(collapsedCounts), " transcript entries. Removed", removed, "duplicated gene entries."), sep="\n")
 cat("\n")
 
+cat("Normalizing counts by gene length...", sep="\n")
+collapsedCounts$normReadCount <- collapsedCounts$ReadCount/collapsedCounts$gene_length
+collapsedCounts$normTcReadCount <- collapsedCounts$TCReadCount/collapsedCounts$gene_length
+cat("\n")
+
 
 cat("Computing new conversion rates and cpm according to gene read counts...", sep="\n")
 collapsedCounts <- collapsedCounts %>%
@@ -62,11 +67,11 @@ collapsedCounts <- collapsedCounts %>%
 
 collapsedCounts$TcReadCPM <- (collapsedCounts$TcReadCount * 1000000)/ sum(collapsedCounts$TcReadCount)
 collapsedCounts$ReadCountCPM <- (collapsedCounts$ReadCount * 1000000)/ sum(collapsedCounts$ReadCount)
+
+collapsedCounts$normTcReadCPM <- (collapsedCounts$normTcReadCount * 1000000)/ sum(collapsedCounts$normTcReadCount)
+collapsedCounts$normReadCountCPM <- (collapsedCounts$normReadCount * 1000000)/ sum(collapsedCounts$normReadCount)
 cat("\n")
 
-cat("Computing new conversion rates and cpm according to gene read counts...", sep="\n")
-collapsedCounts$normReadCounts <- collapsedCounts$ReadCount/collapsedCounts$gene_length
-collapsedCounts$normTCeadCounts <- collapsedCounts$TCReadCount/collapsedCounts$gene_length
 
 
 cat("Adding extra gene information to counts extenden table...", sep="\n")
@@ -91,6 +96,10 @@ collapsedCountsExtra$GeneProfile <- case_when(collapsedCountsExtra[[gene_symbol]
                                         )
 
 collapsedCountsExtra$TcReadRange <- cut(collapsedCounts$TcReadCount, c(0,1,2,3,6,11,26,50,101,251,501,1001, 5001), 
+                                        labels=c("0", "1", "2", "3-5", "6-10", "11-25", "26-50", "51-100", "101-250", "251-500", "501-1000", ">1000"),
+                                        right = FALSE) # FALSE -> [x)   TRUE -> (x] 
+
+collapsedCountsExtra$normTcReadRange <- cut(collapsedCounts$normTcReadCount, c(0,1,2,3,6,11,26,50,101,251,501,1001, 5001), 
                                         labels=c("0", "1", "2", "3-5", "6-10", "11-25", "26-50", "51-100", "101-250", "251-500", "501-1000", ">1000"),
                                         right = FALSE) # FALSE -> [x)   TRUE -> (x]        
 cat("\n")
