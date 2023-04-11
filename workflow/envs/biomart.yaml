@@ -1,0 +1,14 @@
+channels:
+ - conda-forge
+ - defaults
+ - bioconda
+ - r
+dependencies:
+ - r-base
+ - r-readr=2.1.2
+ - r-dplyr
+ - r-ggplot2 
+ - r-pheatmap
+ - r-rcolorbrewer
+ - r-hexbin
+ - bioconductor-biomart
