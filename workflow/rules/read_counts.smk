@@ -11,9 +11,9 @@ rule slam_snp:
         filteredBAM = rules.slam_filter.output.filteredBAM,
         ref_genome = _input_refGenome
     output:
-        snpVCF = 'results/{proj}/slamdunk/snp/{label}_mapped_filtered_snp.vcf'
+        snpVCF = 'results/slamdunk/snp/{label}_mapped_filtered_snp.vcf'
     params:
-        outdir = 'results/{proj}/slamdunk/snp',
+        outdir = 'results/slamdunk/snp',
         variant_fraction = config['slam']['variant_fraction'],
         extra_params = ''  # [-c <coverage cutoff>]
     resources:
@@ -33,10 +33,10 @@ rule slam_count:
         snpVCF = rules.slam_snp.output.snpVCF,
         ref_genome = _input_refGenome
     output:
-        'results/{proj}/slamdunk/count/{label}_mapped_filtered_tcount.tsv'
+        'results/slamdunk/count/{label}_mapped_filtered_tcount.tsv'
     params:
-        outdir = 'results/{proj}/slamdunk/count',
-        snp_dir = 'results/{proj}/slamdunk/snp',
+        outdir = 'results/slamdunk/count',
+        snp_dir = 'results/slamdunk/snp',
         BED_file = _input_bedFile,
         max_len = config['slam']['max_len'],
         conv_threshold = config['slam']['conversion_threshold'],

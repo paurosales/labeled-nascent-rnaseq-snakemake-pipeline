@@ -22,11 +22,11 @@ def _params_for_ngm_mapPE2(wildcards):
 rule ngm_mapPE:
     input: 
         ref_genome = _input_refGenome,
-        fq_trimmed_1 = 'results/{proj}/trimmed_fastq/{label}_val_1.fq.gz',
-        fq_trimmed_2 = 'results/{proj}/trimmed_fastq/{label}_val_2.fq.gz'
+        fq_trimmed_1 = 'results/trimmed_fastq/{label}_val_1.fq.gz',
+        fq_trimmed_2 = 'results/trimmed_fastq/{label}_val_2.fq.gz'
     output:
-        BAM = 'results/{proj}/slamdunk/map/{label}_mapped.bam'
-        # SAM = 'results/{proj}/slamdunk/map/{label}_mapped.bam'
+        BAM = 'results/slamdunk/map/{label}_mapped.bam'
+        # SAM = 'results/slamdunk/map/{label}_mapped.bam'
     params:
         sampleID = _params_for_ngm_mapPE1, 
         sampleName = _params_for_ngm_mapPE2
@@ -34,7 +34,7 @@ rule ngm_mapPE:
         mem_mb = 20000 # 8 GB for human (4 GB for genomes < 500 MBp) according to https://github.com/Cibiv/NextGenMap/wiki
     threads: 36
     log:
-        'logs/{proj}/{label}_ngm.log'
+        'logs/{label}_ngm.log'
     conda:
         '../envs/slamdunk.yaml'
     shell:
@@ -51,13 +51,13 @@ rule ngm_mapPE:
 rule slam_filter:
     input: 
         # rules.ngm_mapPE.output.BAM
-        'results/{proj}/slamdunk/map/{label}_mapped.bam'
+        'results/slamdunk/map/{label}_mapped.bam'
         # rules.remove_scaffolds.output.noScaffoldsBAM
     output:
-        filteredBAM = 'results/{proj}/slamdunk/filter/{label}_mapped_filtered.bam',
-        indexBAM = 'results/{proj}/slamdunk/filter/{label}_mapped_filtered.bam.bai'
+        filteredBAM = 'results/slamdunk/filter/{label}_mapped_filtered.bam',
+        indexBAM = 'results/slamdunk/filter/{label}_mapped_filtered.bam.bai'
     params:
-        outdir = 'results/{proj}/slamdunk/filter',
+        outdir = 'results/slamdunk/filter',
         BED_file = _input_bedFile,
         extra_params = ''  # [-mq <MQ cutoff> (default: 2)] [-mi <identity cutoff> (default: 0.95)] [-nm <NM cutoff> (default: -1)]
     resources:

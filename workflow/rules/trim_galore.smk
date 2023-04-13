@@ -8,17 +8,17 @@ rule trimgalore:
     input:
         unpack(_input_for_trim_fastq)       # uses identifiers as handles and then changes to labels
     output:
-        fq_trimmed_1 = 'results/{proj}/trimmed_fastq/{label}_val_1.fq.gz',
-        fq_trimmed_2 = 'results/{proj}/trimmed_fastq/{label}_val_2.fq.gz'
+        fq_trimmed_1 = 'results/trimmed_fastq/{label}_val_1.fq.gz',
+        fq_trimmed_2 = 'results/trimmed_fastq/{label}_val_2.fq.gz'
     threads: 15
     resources:
         mem_mb = 8000
     conda:
         '../envs/trim.yaml'
     log: 
-        'logs/{proj}/trimmed_fastq/{label}_trim.log'
+        'logs/trimmed_fastq/{label}_trim.log'
     params:
-        outdir = 'results/{proj}/trimmed_fastq',
+        outdir = 'results/trimmed_fastq',
         clip_5 = config['trim_galore']['clip_5'],
         clip_3 = config['trim_galore']['clip_3'],
         length = config['trim_galore']['length'],

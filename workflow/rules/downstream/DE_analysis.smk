@@ -1,5 +1,5 @@
 def _deseq2_input(wildcards):
-    return expand('results/{proj}/slamdunk/count/{label}_mapped_filtered_tcount.tsv', proj=PROJECT, label=LABELS)
+    return expand('results/slamdunk/count/{label}_mapped_filtered_tcount.tsv', proj=PROJECT, label=LABELS)
 
 
 rule deseq2:
@@ -16,7 +16,7 @@ rule deseq2:
     resources:
         mem_mb = 4000
     log: 
-        'logs/{proj}/downstream/deseq2.log'
+        'logs/downstream/deseq2.log'
     conda:
         '../../envs/deseq2.yaml'
     script:

@@ -12,9 +12,9 @@ rule alley_rates:
         filteredBAM = rules.slam_filter.output.filteredBAM,
         ref_genome = _input_refGenome
     output:
-        'results/{proj}/alleyoop/rates/{label}_mapped_filtered_overallrates.csv'
+        'results/alleyoop/rates/{label}_mapped_filtered_overallrates.csv'
     params:
-        outdir = 'results/{proj}/alleyoop/rates',
+        outdir = 'results/alleyoop/rates',
         extra_params = ''  # [-mq <MQ cutoff>]
     resources:
         mem_mb = 2000
@@ -31,10 +31,10 @@ rule alley_utrrates:
         filteredBAM = rules.slam_filter.output.filteredBAM,
         ref_genome = _input_refGenome
     output:
-        'results/{proj}/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.csv',
-        'results/{proj}/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.pdf'
+        'results/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.csv',
+        'results/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.pdf'
     params:
-        outdir = 'results/{proj}/alleyoop/utrrates',
+        outdir = 'results/alleyoop/utrrates',
         BED_file = _input_bedFile,
         extra_params = '-l 100 -m'  # [-mq <MQ cutoff> default = 27] [-m]
     resources:

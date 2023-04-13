@@ -1,5 +1,5 @@
 # proj: "Test_Exons_NoScaffold_NoPseudo"
-proj: "Test_Exons_TC2_Other"
+# proj: "Test_Exons_TC2_Other"
 data_dir: "HL_slam_seq_test_20220803"
 
 samples:

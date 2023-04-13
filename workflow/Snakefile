@@ -17,7 +17,7 @@ configfile: "config/config_template.yaml"
 
 data_dir = config["samples"]["dir"]
 
-PROJECT = config["proj"]
+# PROJECT = config["proj"]
 GENOME = config["genome_build"]
 SAMPLE = config["samples"]["manifest"]
 SAMPLE_MANIFEST = pd.read_table(SAMPLE).set_index("Label") #set index indicates the label
@@ -45,17 +45,19 @@ include: "rules/read_counts.smk"
 # include: "rules/plots.smk"
 include: "rules/conversion_rates.smk"
 
-
+rule all:
+    input:
+        expand(, label=LABELS)
 
 rule all:
     input:
-        # expand("results/{proj}/slamdunk/filter/{label}_mapped_filtered.bam", proj=PROJECT, label=LABELS)
-        # expand("results/{proj}/slamdunk/count/{label}_mapped_filtered_tcount.tsv", proj=PROJECT, label=LABELS)
-        expand("results/{proj}/alleyoop/rates/{label}_mapped_filtered_overallrates.csv", proj=PROJECT, label=LABELS),
-        expand("results/{proj}/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.csv", proj=PROJECT, label=LABELS),
-        # expand("results/{proj}/alleyoop/dedup/{label}_mapped_filtered_dedup.bam", proj=PROJECT, label=LABELS),
-        # expand("results/{proj}/plots/allSamples_TCReadsPercent_barplot.pdf", proj=PROJECT),
-        expand("results/{proj}/plots/{label}/TCReads_vs_Steady.pdf", proj=PROJECT, label=LABELS)
-        # expand("results/{proj}/plots/{label}_transcriptRates_boxplot.pdf", proj=PROJECT, label=LABELS)
-        # expand("results/{proj}/alleyoop/utrrates/{label}_convrates_by_gene.tsv", proj=PROJECT, label=LABELS)
+        # expand("results/slamdunk/filter/{label}_mapped_filtered.bam", proj=PROJECT, label=LABELS)
+        # expand("results/slamdunk/count/{label}_mapped_filtered_tcount.tsv", proj=PROJECT, label=LABELS)
+        expand("results/alleyoop/rates/{label}_mapped_filtered_overallrates.csv", proj=PROJECT, label=LABELS),
+        expand("results/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.csv", proj=PROJECT, label=LABELS),
+        # expand("results/alleyoop/dedup/{label}_mapped_filtered_dedup.bam", proj=PROJECT, label=LABELS),
+        # expand("results/plots/allSamples_TCReadsPercent_barplot.pdf", proj=PROJECT),
+        expand("results/plots/{label}/TCReads_vs_Steady.pdf", proj=PROJECT, label=LABELS)
+        # expand("results/plots/{label}_transcriptRates_boxplot.pdf", proj=PROJECT, label=LABELS)
+        # expand("results/alleyoop/utrrates/{label}_convrates_by_gene.tsv", proj=PROJECT, label=LABELS)
 
