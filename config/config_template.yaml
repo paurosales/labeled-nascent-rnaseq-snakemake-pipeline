@@ -28,6 +28,10 @@ slam:
     # snp
     variant_fraction: 0.2 # for diploids = 0.2
 
+deseq2:
+    subgroup_filter: "" # leave empty if no subgroup requiered, or fill with corresponding group on sample_manifest.tsv
+    pvalue_threshold: 0.05
+
 # DE Analysis
 # transformation: "vst" # only log2, vst or rlog
 # threshold:
