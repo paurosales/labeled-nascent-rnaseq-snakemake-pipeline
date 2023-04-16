@@ -1,11 +1,5 @@
-# proj: "Test_Exons_NoScaffold_NoPseudo"
-# proj: "Test_Exons_TC2_Other"
-data_dir: "HL_slam_seq_test_20220803"
 
-samples:
-    dir: "/home/ife/paulina.rosales/data/HL_slam_seq_test_20220803"
-    # limsCSV: "/home/ife/paulina.rosales/data/HL_slam_seq_test_20220803/Project_469_lims.csv"
-    manifest: "/home/ife/paulina.rosales/data/HL_slam_seq_test_20220803/sample_manifest.tsv"
+sample_manifest: "/home/ife/paulina.rosales/data/HL_slam_seq_test_20220803/sample_manifest.tsv"
 
 # Genome infoNoScaffold
 genome_build: "m38"    #human=hg38, mouse=m38

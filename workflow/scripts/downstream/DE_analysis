@@ -1,7 +1,7 @@
 # R-Script to compute different transcriptional output from SLAMSeq data
 
 # Copyright (c) 2020 Tobias Neumann
-# Based on nf-core/slamseq pipeline
+# Based on nf-core/slamseq pipeline (on April 2023)
 
 log <- file(snakemake@log[[1]], open="wt")
 sink(log)
@@ -87,7 +87,7 @@ deAnalysis <- function(counts, design) {
 
   dds <- dds[ rowSums(counts(dds)) > 0, ] #  remove uninformative rows
 
-  #  Run deseq main command.
+  #  Run deseq main command
 
   dds.total <- DESeq(dds.total)
   sizeFactors(dds) <- sizeFactors(dds.total) # apply size factors to tc counts
