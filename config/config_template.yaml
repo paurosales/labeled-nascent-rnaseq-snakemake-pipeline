@@ -1,33 +1,52 @@
+# --------------------------- Default file paths ---------------------------- #
+SAMPLE_MANIFEST: 'config/sample_manifest.tsv'
 
-sample_manifest: "/home/ife/paulina.rosales/data/HL_slam_seq_test_20220803/sample_manifest.tsv"
+RESULTS_DIR: 'results'
+FIGURE_DIR: 'results/figures'
+QC_DIR: 'results/quality_control'
 
-# Genome infoNoScaffold
-genome_build: "m38"    #human=hg38, mouse=m38
-gencode_version: "25" # human=38, mouse=25
-ensembl_version: 108
+EXTERNAL_DATA_DIR: 'resources/external'
+FASTQ_DIR: 'resources/raw_data'
 
-# Raw processing
-trim_galore:
-    length: 20
-    clip_5: 1
-    clip_3: 1
-    quality: "-q 28" # --2colour 28 
-    extra_params: ""
+LOG_DIR: 'logs'
+TEMP_DIR: 'temp_data'
+REPORT_DIR: 'reports'
 
-slam:
-    max_len: 100
-    # count
-    conversion_threshold: 2 # -c 
-    min_qual: 27 # min base quality for T -> C conversions (default:27)
-    # snp
-    variant_fraction: 0.2 # for diploids = 0.2
+# --------------------------- Handles (?) ---------------------------- #
 
-deseq2:
-    subgroup_filter: "" # leave empty if no subgroup requiered, or fill with corresponding group on sample_manifest.tsv
-    pvalue_threshold: 0.05
+SUBSET_COLUMN: ''
+SUBSET_VALUE: ''
 
-# DE Analysis
-# transformation: "vst" # only log2, vst or rlog
-# threshold:
-#     log2FC: 1
-#     padj: 0.05
+# --------------------------- Params for raw processing ---------------------------- #
+
+TRIM_GALORE:
+    HISEQ: '--quality 20'
+    NOVASEQ: '--2colour 20'
+    NEXTSEQ: '--2colour 20'
+
+    LENGTH: 20
+    CLIP_5: 1
+    CLIP_3: 1
+    EXTRA: ""
+#    lenght: 20
+
+SLAM:
+    MAX_LENGTH: 100
+# -- Filter --
+    MIN_MAP_QUALITY: 2 # (default: 2)
+    MIN_IDENTITY: 0.95 # (default: 0.95)
+    MAX_MISMATCH: -1 # (default: -1)
+# -- Count --
+    CONVERSION_THRESHOLD: 2 # (default: 1)
+    MIN_QUAL: 27 # min base quality for T -> C conversions (default:27)
+# -- SNP --
+    VAR_MIN_COVERAGE: 10 # (default: 10)
+    VAR_FRACTION: 0.2 # for diploids use 0.2 # (default: 0.8)
+
+
+# --------------------------- Params for downstream analysis ---------------------------- #
+DESEQ2:
+    SUBSET_FILTER: '' # leave empty if no subgroup requiered, or fill with corresponding group on sample_manifest.tsv
+    PVAL_THRESHOLD: 0.05
+    # PADJ_THRESHOLD: 1
+    # PADJ_THRESHOLD: 0.05

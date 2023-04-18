@@ -14,7 +14,7 @@ rule gene2transcript_counts:
     log: 
         'logs/slamdunk/{label}_collapse_counts.log'
     conda:
-        '../../envs/biomart.yaml'
+        '../../envs/downstream/biomart.yaml'
     script:
         "../../scripts/counts/collapse_transcripts.R"
 

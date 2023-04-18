@@ -17,48 +17,138 @@ min_version('6.8.0')
 # Load and read Snakemake config 
 configfile: 'config/config_template.yaml'
 
-GENOME = config['genome_build']
-SAMPLE_MANIFEST = pd.read_table(config['sample_manifest']).set_index('Label') #set index indicates the label
-LABELS = list(SAMPLE_MANIFEST.index) # USE SET MULTIINDEX FOR SAMPLE NAMES 
+# --------------------------- Read config file ---------------------------- #
 
-LABELS = list()
+RESULTS_DIR = Path(config['RESULTS_DIR'])
+FIGURE_DIR = Path(config['FIGURE_DIR'])
+QC_DIR = Path(config['QC_DIR'])
 
+EXTERNAL_DATA_DIR = Path(config['EXTERNAL_DATA_DIR'])
+FASTQ_DIR = Path(config['FASTQ_DIR'])
+GENOME_INDEX_DIR = Path(config['GENOME_INDEX_DIR'])
 
-def raw_fastq_identifiers_to_label(label):
-    row = SAMPLE_MANIFEST.loc[label]
-    sample_dir = row['Sample_ID']
-    identifier = row['Sample_Name'] # indicates prefix for .fastq
-    sample_num = row['Sample_Num']
-    return [f'resources/raw_data/{sample_dir}/{identifier}_S{sample_num}_L002_R1_001.fastq.gz', 
-            f'resources/raw_data/{sample_dir}/{identifier}_S{sample_num}_L002_R2_001.fastq.gz']  # change location of input fastq files
-          
+LOG_DIR = Path(config['LOG_DIR'])
+TEMP_DIR = Path(config['TEMP_DIR'])
+REPORT_DIR = Path(config['REPORT_DIR'])
 
-def read_sample_manifes(label):
-    row = SAMPLE_MANIFEST.loc[lims]
+SUBSET_COLUMN = config['SUBSET_COLUMN']
 
 
-# Import rules (order of use)
-include: 'rules/trim_galore.smk'
-include: 'rules/fetch_refseq.smk'
-include: 'rules/mapping.smk'
-include: 'rules/read_counts.smk'
-# include: 'rules/format_counts.smk'
+# --------------------------- Read sample manifest ---------------------------- #
+SAMPLE_MANIFEST = pd.read_table(Path(config['SAMPLE_MANIFEST']))
+
+# Specify the sample info combinations to use as label per sample
+SAMPLES = SAMPLE_MANIFEST.set_index(['Sample_type',
+                                     'Treatment',
+                                     'Bio_rep'])
+
+
+# --------------------------- Dictitonaries ---------------------------- #
+
+# GENCODE realeases dictionary (realease -> genome name # UCSC genome equivalent)
+GENCODE_VERSIONS = {
+    'M25': 'GRCm38', # mm10
+    'M32': 'GRCm39', # mm39
+    '19': 'GRCh37', # h19
+    '38': 'GRCh38', # h38 
+    # 'M1': 'NCBI37' # mm9 uses different handle
+}
+
+# Output files dictionary
+TARGETS = {'raw_seq': [], 
+            'trimmed': [],
+            'hisat2': [],
+            'samtools': [],
+            'salmon': [],
+            'unaligned_reads': []
+            }
+
+# as array for different genomes?
+GENCODE_REALEASE = pd.unique(SAMPLES['Target_genome'])[0]
+GENOME = GENCODE_VERSIONS[GENCODE_REALEASE]
+
+for sample_type, treatment, bio_rep in SAMPLES.index:
+    # Select samples with specified value on a given column in the sample manifest (USE CONFIG FILE TO SELECT)
+    if SUBSET_COLUMN:
+        if SAMPLES.loc[(sample_type, treatment, bio_rep), SUBSET_COLUMN] == config['SUBSET_VALUE']: 
+            TARGETS['raw_seq'].append(str(FASTQ_DIR / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz'))
+            TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
+            TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.hisat2_align.bam'))
+            TARGETS['samtools'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.hisat2_align.filtered.bam.bai'))
+            TARGETS['salmon'].append(str(RESULTS_DIR / 'read_counts' / 'salmon' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / 'quant.sf'))
+            TARGETS['unaligned_reads'].append(str(QC_DIR / 'unaligned_reads_hisat2' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.blast.unaligned_sequences.tsv'))
+    else:
+        TARGETS['raw_seq'].append(str(FASTQ_DIR / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz'))
+        TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
+        TARGETS['hisat2'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.hisat2_align.bam'))
+        TARGETS['samtools'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.hisat2_align.filtered.bam.bai'))
+        TARGETS['salmon'].append(str(RESULTS_DIR / 'read_counts' / 'salmon' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / 'quant.sf'))
+        TARGETS['unaligned_reads'].append(str(QC_DIR / 'unaligned_reads_hisat2' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.blast.unaligned_sequences.tsv'))
+        # TARGETS['tximeta'].append(str(RESULTS_DIR / 'read_counts' / 'salmon' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / 'quant.sf'))
+
+    
+
+# --------------------------- Import rules ---------------------------- #
+
+# --------- Raw procesing 
+include: 'rules/external_data/get_refseq.smk'
+include: 'rules/mapping/trim_galore.smk'
+include: 'rules/mapping/mapping.smk'
+include: 'rules/counts/read_counts.smk'
+# include: 'rules/counts/format_counts.smk'
+
+# --------- Downstream analysis
 # include: 'rules/plots.smk'
-include: 'rules/conversion_rates.smk'
+# include: 'rules/conversion_rates.smk'
+# include: 'rules/downstream/DE_analysis.smk'
+
+# --------------------------- Rules ---------------------------- #
+
+# rule multiqc_report:
+#     output:
+#         base = directory(str(REPORT_DIR / 'multiqc'))
+#     params:
+#         # LOG_DIR = Path(config['LOG_DIR']),
+#         # TEMP_DIR = Path(config['TEMP_DIR']),
+#         # REPORT_DIR = Path(config['REPORT_DIR'])
+#     log:
+#         str(LOG_DIR / 'multiqc' / 'multiqc.log')
+#     threads: 1
+#     conda:
+#         'envs/quality_control/multiqc.yaml'
+#     shell:
+#         """
+#         multiqc --force --interactive \
+#         -o {output.base} -n multiqc_report.html \
+#         {REPORT_DIR} {RESULTS_DIR} {LOG_DIR} &> {log}
+#         """
 
 rule all:
     input:
-        expand(, label=LABELS)
+        expand('resources/external/gencode_{realease}/{genome}_genome.fa.gz', realease=GENCODE_REALEASE, genome=GENOME),
+        TARGETS['trimmed'],
+        TARGETS['hisat2'],
+        TARGETS['samtools'],
+        TARGETS['salmon'],
+        str(REPORT_DIR / 'multiqc'),
+        'results/read_counts/tximeta/GeneSE_counts.tsv',
+        'results/downstream_analysis/differential_expr/DESeqDataSets.RData',
+        'results/downstream_analysis/differential_expr/de_contrast.Rds'
+    default_target: True
 
-rule all:
-    input:
-        # expand('results/slamdunk/filter/{label}_mapped_filtered.bam', proj=PROJECT, label=LABELS)
-        # expand('results/slamdunk/count/{label}_mapped_filtered_tcount.tsv', proj=PROJECT, label=LABELS)
-        expand('results/alleyoop/rates/{label}_mapped_filtered_overallrates.csv', proj=PROJECT, label=LABELS),
-        expand('results/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.csv', proj=PROJECT, label=LABELS),
-        # expand('results/alleyoop/dedup/{label}_mapped_filtered_dedup.bam', proj=PROJECT, label=LABELS),
-        # expand('results/plots/allSamples_TCReadsPercent_barplot.pdf', proj=PROJECT),
-        expand('results/plots/{label}/TCReads_vs_Steady.pdf', proj=PROJECT, label=LABELS)
-        # expand('results/plots/{label}_transcriptRates_boxplot.pdf', proj=PROJECT, label=LABELS)
-        # expand('results/alleyoop/utrrates/{label}_convrates_by_gene.tsv', proj=PROJECT, label=LABELS)
+# rule all:
+#     input:
+#         expand(, label=LABELS)
+
+# rule all:
+#     input:
+#         # expand('results/slamdunk/filter/{label}_mapped_filtered.bam', proj=PROJECT, label=LABELS)
+#         # expand('results/slamdunk/count/{label}_mapped_filtered_tcount.tsv', proj=PROJECT, label=LABELS)
+#         expand('results/alleyoop/rates/{label}_mapped_filtered_overallrates.csv', proj=PROJECT, label=LABELS),
+#         expand('results/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.csv', proj=PROJECT, label=LABELS),
+#         # expand('results/alleyoop/dedup/{label}_mapped_filtered_dedup.bam', proj=PROJECT, label=LABELS),
+#         # expand('results/plots/allSamples_TCReadsPercent_barplot.pdf', proj=PROJECT),
+#         expand('results/plots/{label}/TCReads_vs_Steady.pdf', proj=PROJECT, label=LABELS)
+#         # expand('results/plots/{label}_transcriptRates_boxplot.pdf', proj=PROJECT, label=LABELS)
+#         # expand('results/alleyoop/utrrates/{label}_convrates_by_gene.tsv', proj=PROJECT, label=LABELS)
 
