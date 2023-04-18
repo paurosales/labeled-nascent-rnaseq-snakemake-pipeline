@@ -12,9 +12,10 @@ suppressPackageStartupMessages({
 })
 
 # Parse snakemake arguments
+files <- snakemake@input[["geneCounts"]]
 tcPercentPDF <- snakemake@output[["tcPercentPDF"]]
 sample_manifest <- snakemake@params[["sample_manifest"]]
-indir <- snakemake@params[["indir"]]
+# indir <- snakemake@params[["indir"]]
 genome_build <- snakemake@params[["genome_build"]]
 
 palette <- brewer.pal(n = 12, name = "Paired")
@@ -27,12 +28,10 @@ if (genome_build == "m38"){
 
 
 samples <- read.table(sample_manifest, stringsAsFactors=FALSE, header=T, sep="\t")
-# Sample_ID	Sample_Name	Sample_NameLIMS	FID_comment	Sample_Project	Library.Protocol	Mergefastq	
-# Read.length	Organism	Sample_Num	Type	Condition	Target	Bio_rep	   Label
 
-files <- paste(indir, "/", samples$Label, "_tcount_by_gene_extended.tsv", sep="") # particular handle tcount.tsv files, change if needed
+# files <- paste(indir, "/", samples$Label, "_tcount_by_gene_extended.tsv", sep="") # particular handle tcount.tsv files, change if needed
 order <- c("0", "1", "2", "3-5", "6-10", "11-25", "26-50", "51-100", "101-250", "251-500", "501-1000", ">1000")
-cat(paste("Plotting T>C read counts percentages for ", length(files), " samples with...", sep=""), sep="\n")
+cat(paste("Plotting normalized T>C read counts percentages for ", length(files), " samples with...", sep=""), sep="\n")
 allLabels <- c()
 allRanges <- c()
 allFreq <- c()
@@ -40,7 +39,8 @@ for (f in 1:length(files)){
         collapsedCountsExtra <- read.table(files[f], stringsAsFactors=FALSE, header=TRUE, sep="\t")
         rangeFreq <- as.data.frame(table(collapsedCountsExtra$normTcReadRange))
         rangeFreq <- rangeFreq[match(order, rangeFreq$Var1),]
-        label <- rep(paste(samples$Condition[f], "_", samples$Target[f], sep=""), nrow(rangeFreq))
+        # label <- rep(paste(samples$Condition[f], "_", samples$Target[f], sep=""), nrow(rangeFreq))
+        label <- rep(paste(samples$Sample_type[f], "_", samples$Treatment[f], "_Bio-rep_", samples$Bio_rep[f], sep=""), nrow(rangeFreq))
         allLabels <- append(allLabels, label)
         allRanges <- append(allRanges, rangeFreq$Var1)
         allFreq <- append(allFreq, rangeFreq$Freq)
