@@ -1,9 +1,9 @@
 # Handle wildcards errors
 def _input_refGenome(wildcards):
-    return expand('resources/external/gencode/Mus_musculus.GRC{genome}.primary_assembly.genome.fa', genome=GENOME)
+    return expand('resources/external/gencode_{realease}/GRC{genome}.genome.fa', realease=GENCODE_REALEASE, genome=GENOME)
 
 def _input_bedFile(wildcards):
-    return expand('resources/external/gencode/Mus_musculus.GRC{genome}.transcripts.bed', genome=GENOME)
+    return expand('resources/external/gencode_{realease}/GRC{genome}.transcripts.bed', genome=GENOME)
 
 
 rule slam_snp:
@@ -11,19 +11,19 @@ rule slam_snp:
         filteredBAM = rules.slam_filter.output.filteredBAM,
         ref_genome = _input_refGenome
     output:
-        snpVCF = 'results/slamdunk/snp/{label}_mapped_filtered_snp.vcf'
+        snpVCF = 'results/variant_call/{sample_type}_{treatment}_Bio-rep_{bio_rep}.snp.vcf'
     params:
-        outdir = 'results/slamdunk/snp',
-        variant_fraction = config['slam']['variant_fraction'],
-        extra_params = ''  # [-c <coverage cutoff>]
+        outdir = 'results/variant_call',
+        var_fract = config['SLAM']['VAR_FRACTION'],
+        var_cov = config['SLAM']['VAR_MIN_COVERAGE']
     resources:
         mem_mb = 6000
     threads: 18
     conda:
-        '../envs/slamdunk.yaml'
+        '../envs/raw_processing/slamdunk.yaml'
     shell:
         """
-            slamdunk snp  -o {params.outdir} -r {input.ref_genome} -t {threads} -f {params.variant_fraction} {params.extra_params} {input.filteredBAM}
+            slamdunk snp  -o {params.outdir} -r {input.ref_genome} -t {threads} -f {params.car_fract} -c {params.var_cov} {input.filteredBAM}
         """
 
 
@@ -31,23 +31,23 @@ rule slam_count:
     input: 
         filteredBAM = rules.slam_filter.output.filteredBAM,
         snpVCF = rules.slam_snp.output.snpVCF,
+        BED_file = _input_bedFile,
         ref_genome = _input_refGenome
     output:
-        'results/slamdunk/count/{label}_mapped_filtered_tcount.tsv'
+        'results/counts/{sample_type}_{treatment}_Bio-rep_{bio_rep}.tcount.tsv'
     params:
-        outdir = 'results/slamdunk/count',
-        snp_dir = 'results/slamdunk/snp',
-        BED_file = _input_bedFile,
-        max_len = config['slam']['max_len'],
-        conv_threshold = config['slam']['conversion_threshold'],
-        min_qual = config['slam']['min_qual']
+        outdir = 'results/counts',
+        snp_dir = 'results/variant_call',
+        max_len = config['SLAM']['MAX_LENGTH'],
+        conv_th = config['SLAM']['CONVERSION_THRESHOLD'],
+        min_qual = config['SLAM']['MIN_QUAL']
     resources:
         mem_mb = 8000
     threads: 30
     conda:
-        '../envs/slamdunk.yaml'
+        '../envs/raw_processing/slamdunk.yaml'
     shell:
         """
-            slamdunk count -o {params.outdir} -s {params.snp_dir} -r {input.ref_genome} -b {params.BED_file} -t {threads}\
-            -l {params.max_len} -c {params.conv_threshold} -q {params.min_qual} {input.filteredBAM}
+            slamdunk count -o {params.outdir} -s {params.snp_dir} -r {input.ref_genome} -b {input.BED_file} -t {threads}\
+            -l {params.max_len} -c {params.conv_th} -q {params.min_qual} {input.filteredBAM}
         """

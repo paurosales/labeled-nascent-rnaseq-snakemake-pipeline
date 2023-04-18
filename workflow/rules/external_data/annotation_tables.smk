@@ -39,10 +39,10 @@ rule gtf2bed:
 # CHANGEEEEEE
 rule get_ensembl_geneset:
     output:
-        genesetTSV = 'resources/external/ensembl/Mus_musculus.GRC{genome}.geneset.tsv',
-        transcriptsetTSV = 'resources/external/ensembl/Mus_musculus.GRC{genome}.transcriptset.tsv'
+        genesetTSV = 'resources/external/ensembl/GRC{genome}.geneset.tsv',
+        transcriptsetTSV = 'resources/external/ensembl/GRC{genome}.transcriptset.tsv'
     params: 
-        ensembl_version = config['ensembl_version']
+        ensembl_version = config['ENSEMBL']['VERSION']
     threads: 6
     conda:
         '../../envs/biomart.yaml' # change name

@@ -10,6 +10,7 @@ import requests
 import urllib3
 from snakemake.utils import min_version
 from snakemake.logging import logger
+
 # Minimal version of snakemake
 min_version('6.8.0')
 
@@ -57,10 +58,11 @@ GENCODE_VERSIONS = {
 # Output files dictionary
 TARGETS = {'raw_seq': [], 
             'trimmed': [],
-            'hisat2': [],
-            'samtools': [],
-            'salmon': [],
-            'unaligned_reads': []
+            'slam_map': [],
+            'slam_filter': [],
+            'slam_snp': [],
+            'slam_count': [],
+            'genecounts': []
             }
 
 # as array for different genomes?
@@ -73,18 +75,22 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
         if SAMPLES.loc[(sample_type, treatment, bio_rep), SUBSET_COLUMN] == config['SUBSET_VALUE']: 
             TARGETS['raw_seq'].append(str(FASTQ_DIR / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz'))
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
-            TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.hisat2_align.bam'))
-            TARGETS['samtools'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.hisat2_align.filtered.bam.bai'))
-            TARGETS['salmon'].append(str(RESULTS_DIR / 'read_counts' / 'salmon' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / 'quant.sf'))
-            TARGETS['unaligned_reads'].append(str(QC_DIR / 'unaligned_reads_hisat2' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.blast.unaligned_sequences.tsv'))
+            TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
+            TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.filtered.bam.bai'))
+            TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / '.snp.vcf'))
+            TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.tcount.tsv'))
+            TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv'))
     else:
-        TARGETS['raw_seq'].append(str(FASTQ_DIR / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz'))
-        TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
-        TARGETS['hisat2'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.hisat2_align.bam'))
-        TARGETS['samtools'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.hisat2_align.filtered.bam.bai'))
-        TARGETS['salmon'].append(str(RESULTS_DIR / 'read_counts' / 'salmon' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / 'quant.sf'))
-        TARGETS['unaligned_reads'].append(str(QC_DIR / 'unaligned_reads_hisat2' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.blast.unaligned_sequences.tsv'))
-        # TARGETS['tximeta'].append(str(RESULTS_DIR / 'read_counts' / 'salmon' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / 'quant.sf'))
+            TARGETS['raw_seq'].append(str(FASTQ_DIR / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz'))
+            TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
+            TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
+            TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.filtered.bam.bai'))
+            TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / '.snp.vcf'))
+            TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.tcount.tsv'))
+            TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv'))
+            # TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.tcount.tsv'))
+            # TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.tcount.tsv'))
+            
 
     
 
@@ -95,7 +101,7 @@ include: 'rules/external_data/get_refseq.smk'
 include: 'rules/mapping/trim_galore.smk'
 include: 'rules/mapping/mapping.smk'
 include: 'rules/counts/read_counts.smk'
-# include: 'rules/counts/format_counts.smk'
+include: 'rules/counts/collapse_counts.smk'k
 
 # --------- Downstream analysis
 # include: 'rules/plots.smk'
@@ -127,28 +133,6 @@ rule all:
     input:
         expand('resources/external/gencode_{realease}/{genome}_genome.fa.gz', realease=GENCODE_REALEASE, genome=GENOME),
         TARGETS['trimmed'],
-        TARGETS['hisat2'],
-        TARGETS['samtools'],
-        TARGETS['salmon'],
-        str(REPORT_DIR / 'multiqc'),
-        'results/read_counts/tximeta/GeneSE_counts.tsv',
-        'results/downstream_analysis/differential_expr/DESeqDataSets.RData',
-        'results/downstream_analysis/differential_expr/de_contrast.Rds'
+        TARGETS['slam_count'],
+        TARGETS['gene_counts']
     default_target: True
-
-# rule all:
-#     input:
-#         expand(, label=LABELS)
-
-# rule all:
-#     input:
-#         # expand('results/slamdunk/filter/{label}_mapped_filtered.bam', proj=PROJECT, label=LABELS)
-#         # expand('results/slamdunk/count/{label}_mapped_filtered_tcount.tsv', proj=PROJECT, label=LABELS)
-#         expand('results/alleyoop/rates/{label}_mapped_filtered_overallrates.csv', proj=PROJECT, label=LABELS),
-#         expand('results/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.csv', proj=PROJECT, label=LABELS),
-#         # expand('results/alleyoop/dedup/{label}_mapped_filtered_dedup.bam', proj=PROJECT, label=LABELS),
-#         # expand('results/plots/allSamples_TCReadsPercent_barplot.pdf', proj=PROJECT),
-#         expand('results/plots/{label}/TCReads_vs_Steady.pdf', proj=PROJECT, label=LABELS)
-#         # expand('results/plots/{label}_transcriptRates_boxplot.pdf', proj=PROJECT, label=LABELS)
-#         # expand('results/alleyoop/utrrates/{label}_convrates_by_gene.tsv', proj=PROJECT, label=LABELS)
-

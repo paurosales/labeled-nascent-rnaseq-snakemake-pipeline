@@ -12,7 +12,7 @@ LOG_DIR: 'logs'
 TEMP_DIR: 'temp_data'
 REPORT_DIR: 'reports'
 
-# --------------------------- Handles (?) ---------------------------- #
+# --------------------------- Handles ---------------------------- #
 
 SUBSET_COLUMN: ''
 SUBSET_VALUE: ''
@@ -36,15 +36,19 @@ SLAM:
     MIN_MAP_QUALITY: 2 # (default: 2)
     MIN_IDENTITY: 0.95 # (default: 0.95)
     MAX_MISMATCH: -1 # (default: -1)
-# -- Count --
-    CONVERSION_THRESHOLD: 2 # (default: 1)
-    MIN_QUAL: 27 # min base quality for T -> C conversions (default:27)
 # -- SNP --
     VAR_MIN_COVERAGE: 10 # (default: 10)
     VAR_FRACTION: 0.2 # for diploids use 0.2 # (default: 0.8)
+# -- Count --
+    CONVERSION_THRESHOLD: 2 # (default: 1)
+    MIN_QUAL: 27 # min base quality for T -> C conversions (default:27)
 
 
 # --------------------------- Params for downstream analysis ---------------------------- #
+
+ENSEMBL:
+    VERSION: 108
+
 DESEQ2:
     SUBSET_FILTER: '' # leave empty if no subgroup requiered, or fill with corresponding group on sample_manifest.tsv
     PVAL_THRESHOLD: 0.05
