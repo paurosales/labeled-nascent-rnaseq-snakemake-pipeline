@@ -1,6 +1,6 @@
 def _params_get_seq(wildcards):
   
-    if wildcards.realease.startswith('M'):
+    if wildcards.release.startswith('M'):
         organism = 'mouse'
     else:
         organism = 'human'
@@ -11,17 +11,17 @@ def _params_get_seq(wildcards):
 
 rule get_genome:
     output:
-        'resources/external/gencode_{realease}/GRC{genome}.genome.fa.gz'
+        'resources/external/gencode_{release}/{genome}_genome.fa.gz'
     params:
-        _params_get_seq
+        organism = _params_get_seq
     log:
-        'logs/external_data/get_gencode_{realease}_{genome}_genome.log'
+        'logs/external_data/get_gencode_{release}_{genome}_genome.log'
     threads: 1
     resources:
         http = 1
     shell:
         """
-            wget --quiet http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_{params.organism}/release_{wildcards.realease}/{wildcards.genome}.primary_assembly.genome.fa.gz -O  {output}
+            wget --quiet http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_{params.organism}/release_{wildcards.release}/{wildcards.genome}.primary_assembly.genome.fa.gz -O  {output}
         """
 
 
@@ -29,7 +29,7 @@ rule unzip_genome:
     input:
         rules.get_genome.output
     output:
-        temp('resources/external/gencode_{realease}/GRC{genome}.genome.fa')
+        temp('resources/external/gencode_{release}/{genome}.genome.fa')
     shell:
         """
              gzip -dc {input} > {output}
@@ -37,17 +37,17 @@ rule unzip_genome:
 
 rule get_annotation:
     output:
-        'resources/external/gencode_{realease}/GRC{genome}.annotation.gtf.gz'
+        'resources/external/gencode_{release}/{genome}.annotation.gtf.gz'
     params:
         organism = _params_get_seq
     log:
-        'logs/external_data/get_gencode_{realease}_{genome}_annotation.log'
+        'logs/external_data/get_gencode_{release}_{genome}_annotation.log'
     threads: 1
     resources:
         http = 1
     shell:
         """
-            wget --quiet http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_{params.organism}/release_{wildcards.realease}/gencode.v{wildcards.realease}.annotation.gft.gz -O  {output}
+            wget --quiet http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_{params.organism}/release_{wildcards.release}/gencode.v{wildcards.release}.annotation.gft.gz -O  {output}
         """
 
 
@@ -55,7 +55,7 @@ rule unzip_gft:
     input:
         rules.get_genome.output
     output:
-        temp('resources/external/gencode_{realease}/GRC{genome}.annotation.gft')
+        temp('resources/external/gencode_{release}/{genome}.annotation.gtf')
     shell:
         """
              gzip -dc {input} > {output}

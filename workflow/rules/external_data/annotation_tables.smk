@@ -1,8 +1,8 @@
 rule gtf2bed:
     input:
-        'resources/external/gencode_{release}/GRC{genome}.annotation.gtf'
+        'resources/external/gencode_{release}/{genome}.annotation.gtf'
     output:
-        'resources/external/gencode_{release}/GRC{genome}.transcripts.bed'
+        'resources/external/gencode_{release}/{genome}.transcripts.bed'
     shell:
         #   select colums : seqname start end strand attribute
         #   separate attributes
@@ -10,15 +10,15 @@ rule gtf2bed:
         """
         zgrep -P "\ttranscript\t" {input} | cut -f1,4,5,7,9 | \
         sed 's/[[:space:]]/\t/g' | sed 's/[;|"]//g' | \
-        awk -F $'\t' 'BEGIN { OFS=FS } { print $1,$2-1,$3,$10,".",$4,$14,$12,$18 }' | \
+        awk -F $'\t' 'BEGIN {{ OFS=FS }} {{ print $1,$2-1,$3,$10,".",$4,$14,$12,$18 }}' | \
         sort -k1,1 -k2,2n > {output}
         """
 
 
-# zgrep -P "\ttranscript\t" Mus_musculus.GRCm39.108.gtf.gz | cut -f1,4,5,7,9 | \
+# zgrep -P "\ttranscript\t" Mus_musculus.m39.108.gtf.gz | cut -f1,4,5,7,9 | \
 # sed 's/[[:space:]]/\t/g' | sed 's/[;|"]//g' | \
 # awk -F $'\t' 'BEGIN { OFS=FS } { print $1,$2-1,$3,($10)"."($12),".",$4,$14,$18 }' | \
-# sort -k1,1 -k2,2n > Mus_musculus.GRCm39_108.transcripts.bed
+# sort -k1,1 -k2,2n > Mus_musculus.m39_108.transcripts.bed
 
 # TRANSCRIPT ATTRIBUTES
 # gene_id "ENSMUSG00000095742"; 
@@ -39,13 +39,13 @@ rule gtf2bed:
 # CHANGEEEEEE
 rule get_ensembl_geneset:
     output:
-        genesetTSV = 'resources/external/ensembl/GRC{genome}.geneset.tsv',
-        transcriptsetTSV = 'resources/external/ensembl/GRC{genome}.transcriptset.tsv'
+        genesetTSV = 'resources/external/ensembl/{genome}.geneset.tsv',
+        transcriptsetTSV = 'resources/external/ensembl/{genome}.transcriptset.tsv'
     params: 
         ensembl_version = config['ENSEMBL']['VERSION']
     threads: 6
     conda:
-        '../../envs/biomart.yaml' # change name
+        '../../envs/downstream/biomart.yaml'
     resources:
         mem_mb = 4000
     script:

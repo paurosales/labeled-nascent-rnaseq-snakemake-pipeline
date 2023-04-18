@@ -26,7 +26,6 @@ QC_DIR = Path(config['QC_DIR'])
 
 EXTERNAL_DATA_DIR = Path(config['EXTERNAL_DATA_DIR'])
 FASTQ_DIR = Path(config['FASTQ_DIR'])
-GENOME_INDEX_DIR = Path(config['GENOME_INDEX_DIR'])
 
 LOG_DIR = Path(config['LOG_DIR'])
 TEMP_DIR = Path(config['TEMP_DIR'])
@@ -46,7 +45,7 @@ SAMPLES = SAMPLE_MANIFEST.set_index(['Sample_type',
 
 # --------------------------- Dictitonaries ---------------------------- #
 
-# GENCODE realeases dictionary (realease -> genome name # UCSC genome equivalent)
+# GENCODE releases dictionary (release -> genome name # UCSC genome equivalent)
 GENCODE_VERSIONS = {
     'M25': 'GRCm38', # mm10
     'M32': 'GRCm39', # mm39
@@ -62,12 +61,12 @@ TARGETS = {'raw_seq': [],
             'slam_filter': [],
             'slam_snp': [],
             'slam_count': [],
-            'genecounts': []
+            'gene_counts': []
             }
 
 # as array for different genomes?
-GENCODE_REALEASE = pd.unique(SAMPLES['Target_genome'])[0]
-GENOME = GENCODE_VERSIONS[GENCODE_REALEASE]
+GENCODE_RELEASE = pd.unique(SAMPLES['Target_genome'])[0]
+GENOME = GENCODE_VERSIONS[GENCODE_RELEASE]
 
 for sample_type, treatment, bio_rep in SAMPLES.index:
     # Select samples with specified value on a given column in the sample manifest (USE CONFIG FILE TO SELECT)
@@ -101,7 +100,8 @@ include: 'rules/external_data/get_refseq.smk'
 include: 'rules/mapping/trim_galore.smk'
 include: 'rules/mapping/mapping.smk'
 include: 'rules/counts/read_counts.smk'
-include: 'rules/counts/collapse_counts.smk'k
+include: 'rules/external_data/annotation_tables.smk'
+include: 'rules/counts/collapse_counts.smk'
 
 # --------- Downstream analysis
 # include: 'rules/plots.smk'
@@ -131,8 +131,8 @@ include: 'rules/counts/collapse_counts.smk'k
 
 rule all:
     input:
-        expand('resources/external/gencode_{realease}/{genome}_genome.fa.gz', realease=GENCODE_REALEASE, genome=GENOME),
+        expand('resources/external/gencode_{release}/{genome}_genome.fa.gz', release=GENCODE_RELEASE, genome=GENOME),
         TARGETS['trimmed'],
         TARGETS['slam_count'],
         TARGETS['gene_counts']
-    default_target: True
+    # default_target: True

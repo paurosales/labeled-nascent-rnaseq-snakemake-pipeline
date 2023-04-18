@@ -1,9 +1,9 @@
 # Handle wildcards errors
 def _input_refGenome(wildcards):
-    return expand('resources/external/gencode_{realease}/GRC{genome}.genome.fa', realease=GENCODE_REALEASE, genome=GENOME)
+    return expand('resources/external/gencode_{release}/{genome}.genome.fa', release=GENCODE_RELEASE, genome=GENOME)
 
 def _input_bedFile(wildcards):
-    return expand('resources/external/gencode_{realease}/GRC{genome}.transcripts.bed', genome=GENOME)
+    return expand('resources/external/gencode_{release}/{genome}.transcripts.bed', release=GENCODE_RELEASE, genome=GENOME)
 
 
 rule slam_snp:
@@ -20,10 +20,10 @@ rule slam_snp:
         mem_mb = 6000
     threads: 18
     conda:
-        '../envs/raw_processing/slamdunk.yaml'
+        '../../envs/raw_processing/slamdunk.yaml'
     shell:
         """
-            slamdunk snp  -o {params.outdir} -r {input.ref_genome} -t {threads} -f {params.car_fract} -c {params.var_cov} {input.filteredBAM}
+            slamdunk snp  -o {params.outdir} -r {input.ref_genome} -t {threads} -f {params.var_fract} -c {params.var_cov} {input.filteredBAM}
         """
 
 
@@ -45,7 +45,7 @@ rule slam_count:
         mem_mb = 8000
     threads: 30
     conda:
-        '../envs/raw_processing/slamdunk.yaml'
+        '../../envs/raw_processing/slamdunk.yaml'
     shell:
         """
             slamdunk count -o {params.outdir} -s {params.snp_dir} -r {input.ref_genome} -b {input.BED_file} -t {threads}\

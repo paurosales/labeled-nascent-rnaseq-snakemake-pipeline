@@ -1,16 +1,16 @@
 # Handle wildcards errors
 def _input_refGenome(wildcards):
-    return expand('resources/external/gencode_{realease}/GRC{genome}.genome.fa', realease=GENCODE_REALEASE, genome=GENOME)
+    return expand('resources/external/gencode_{release}/{genome}.genome.fa', release=GENCODE_RELEASE, genome=GENOME)
 
 def _input_bedFile(wildcards):
-    return expand('resources/external/gencode_{realease}/GRC{genome}.transcripts.bed', genome=GENOME)
+    return expand('resources/external/gencode_{release}/{genome}.transcripts.bed', release=GENCODE_RELEASE, genome=GENOME)
 
 
 rule ngm_mapPE:
     input: 
         ref_genome = _input_refGenome,
-        fq_trimmed_1 = 'results/trimmed_fastq/{sample_type}_{treatment}_Bio-rep_{bio_rep}_val_1.fq.gz',
-        fq_trimmed_2 = 'results/trimmed_fastq/{sample_type}_{treatment}_Bio-rep_{bio_rep}_val_2.fq.gz'
+        fq_trimmed_1 = 'results/fastq/trimmed/{sample_type}_{treatment}_Bio-rep_{bio_rep}_val_1.fq.gz',
+        fq_trimmed_2 = 'results/fastq/trimmed/{sample_type}_{treatment}_Bio-rep_{bio_rep}_val_2.fq.gz'
     output:
         mapBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'
     params:
@@ -21,7 +21,7 @@ rule ngm_mapPE:
     log:
         'logs/{sample_type}_{treatment}_Bio-rep_{bio_rep}_ngm.log'
     conda:
-        '../envs/raw_processing/slamdunk.yaml'
+        '../../envs/raw_processing/slamdunk.yaml'
     shell:
         """
             ngm -b -r {input.ref_genome}\
@@ -36,12 +36,12 @@ rule ngm_mapPE:
 rule slam_filter:
     input: 
         BED_file = _input_bedFile,
-        mapBAM = 'results/slamdunk/map/{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'
+        mapBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'
     output:
-        outdir = directory('results/bam_files'),
         filteredBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}.filtered.bam',
         indexBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}.filtered.bam.bai'
     params:
+        outdir = directory('results/bam_files'),
         min_qual = config['SLAM']['MIN_MAP_QUALITY'],
         min_ident = config['SLAM']['MIN_IDENTITY'],
         max_mismatch = config['SLAM']['MAX_MISMATCH']
@@ -49,10 +49,10 @@ rule slam_filter:
         mem_mb = 8000
     threads: 30
     conda:
-        '../envs/raw_processing/slamdunk.yaml'
+        '../../envs/raw_processing/slamdunk.yaml'
     shell:
         """
-            slamdunk filter -o {output.outdir} -b {input.BED_file}\
+            slamdunk filter -o {params.outdir} -b {input.BED_file}\
             -mq {params.min_qual} -mi {params.min_ident} -nm {params.max_mismatch}\
             -t {threads} {input.mapBAM}
         """

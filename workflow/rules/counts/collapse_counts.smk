@@ -1,12 +1,16 @@
+def _input_ensembl_tabs(wildcards):
+    return [expand('resources/external/ensembl/{genome}.geneset.tsv', genome=GENOME),
+            expand('resources/external/ensembl/{genome}.transcriptset.tsv', genome=GENOME)]
+
+
 rule gene2transcript_counts:
     input: 
-        tcounTSV = rules.slam_count.output,
-        genesetTSV = rules.get_ensembl.output.genesetTSV,
-        transcriptsetTSV = rules.get_ensembl.output.transcriptsetTSV
+        unpack(_input_ensembl_tabs),
+        tcounTSV = rules.slam_count.output
     output:
-        geneCountsRData = 'results/slamdunk/count/{sample_type}_{treatment}_Bio-rep_{bio_rep}_geneCounts.RData',
-        geneCountsTSV = 'results/slamdunk/count/{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv',
-        geneCountsExtraTSV = 'results/slamdunk/count/{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.extended.tsv'
+        geneCountsRData = 'results/counts/{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.RData',
+        geneCountsTSV = 'results/counts/{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv',
+        geneCountsExtraTSV = 'results/counts/{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.extended.tsv'
     params:
         ensembl_version = config['ENSEMBL']['VERSION']
     resources:
@@ -22,8 +26,8 @@ rule gene2transcript_counts:
 # rule rates_collapse_transcripts:
 #     input: 
 #         convRatesTSV = rules.alley_utrrates.output,
-#         genesetTSV = rules.get_ensembl.output.genesetTSV,
-#         transcriptsetTSV = rules.get_ensembl.output.transcriptsetTSV
+#         genesetTSV = rules.get_ensembl_geneset.output.genesetTSV,
+#         transcriptsetTSV = rules.get_ensembl_geneset.output.transcriptsetTSV
 #     output:
 #         convRatesGeneTSV = 'results/alleyoop/utrrates/{sample_type}_{treatment}_Bio-rep_{bio_rep}_convrates_by_gene.tsv'
 #     params:

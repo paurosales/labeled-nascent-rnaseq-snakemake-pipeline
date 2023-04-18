@@ -15,7 +15,7 @@ rule trim_galore:
     resources:
         mem_mb = 5000
     conda:
-        '../../envs/alignment/trim-galore.yaml'
+        '../../envs/raw_processing/trim-galore.yaml'
     log: 
         'logs/fastq/trim_galore/{sample_type}_{treatment}_Bio-rep_{bio_rep}.log'
         # str(LOG_DIR / 'trim_galore' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.log')
