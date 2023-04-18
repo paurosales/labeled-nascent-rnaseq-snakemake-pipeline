@@ -1,8 +1,8 @@
 rule gtf2bed:
     input:
-        'resources/external/gencode/Mus_musculus.GRC{genome}.annotation.gtf'
+        'resources/external/gencode_{release}/GRC{genome}.annotation.gtf'
     output:
-        'resources/external/gencode/Mus_musculus.GRC{genome}.transcripts.bed'
+        'resources/external/gencode_{release}/GRC{genome}.transcripts.bed'
     shell:
         #   select colums : seqname start end strand attribute
         #   separate attributes
@@ -36,7 +36,7 @@ rule gtf2bed:
 # tag "Ensembl_canonical"; 
 # transcript_support_level "5 (assigned to previous version 1)"
  
-
+# CHANGEEEEEE
 rule get_ensembl_geneset:
     output:
         genesetTSV = 'resources/external/ensembl/Mus_musculus.GRC{genome}.geneset.tsv',
