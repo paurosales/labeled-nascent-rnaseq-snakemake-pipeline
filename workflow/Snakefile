@@ -110,24 +110,30 @@ include: 'rules/counts/collapse_counts.smk'
 
 # --------------------------- Rules ---------------------------- #
 
+
 # rule multiqc_report:
 #     output:
 #         base = directory(str(REPORT_DIR / 'multiqc'))
 #     params:
-#         # LOG_DIR = Path(config['LOG_DIR']),
-#         # TEMP_DIR = Path(config['TEMP_DIR']),
-#         # REPORT_DIR = Path(config['REPORT_DIR'])
-#     log:
-#         str(LOG_DIR / 'multiqc' / 'multiqc.log')
-#     threads: 1
+#         title = 'MultiQC report: SLAM-Seq data'
 #     conda:
 #         'envs/quality_control/multiqc.yaml'
+#     log:
+#         str(LOG_DIR / 'multiqc' / 'multiqc.log')
+#     shell:
+#         """
+#         multiqc -o {output.base} -n multiqc_report.html\
+#         -m fastqc -m cutadapt -m slamdunk -f\
+#         --title {params.title}\
+#         {REPORT_DIR} {RESULTS_DIR} {LOG_DIR} &> {log}
+#         """
 #     shell:
 #         """
 #         multiqc --force --interactive \
 #         -o {output.base} -n multiqc_report.html \
 #         {REPORT_DIR} {RESULTS_DIR} {LOG_DIR} &> {log}
 #         """
+
 
 rule all:
     input:
