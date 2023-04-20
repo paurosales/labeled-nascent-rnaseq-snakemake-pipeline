@@ -1,4 +1,5 @@
 results/*
 resources/*
 logs/*
-config/sample_manifest*
+config/sample_manifest.tsv
+.snakemake
