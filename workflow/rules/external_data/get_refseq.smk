@@ -1,6 +1,6 @@
 def _params_get_seq(wildcards):
   
-    if wildcards.release.startswith('M'):
+    if GENCODE_RELEASE.startswith('M'):
         organism = 'mouse'
     else:
         organism = 'human'
@@ -21,7 +21,7 @@ rule get_genome:
         http = 1
     shell:
         """
-            wget --quiet http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_{params.organism}/release_{wildcards.release}/{wildcards.genome}.primary_assembly.genome.fa.gz -O  {output}
+            wget --quiet http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_{params.organism}/release_{wildcards.release}/{wildcards.genome}.primary_assembly.genome.fa.gz -O  {output} 2> {log}
         """
 
 
@@ -47,7 +47,7 @@ rule get_annotation:
         http = 1
     shell:
         """
-            wget --quiet http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_{params.organism}/release_{wildcards.release}/gencode.v{wildcards.release}.annotation.gft.gz -O  {output}
+            wget --quiet http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_{params.organism}/release_{wildcards.release}/gencode.v{wildcards.release}.annotation.gft.gz -O  {output} 2> {log}
         """
 
 

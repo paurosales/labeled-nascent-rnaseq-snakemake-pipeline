@@ -2,7 +2,7 @@ channels:
  - conda-forge
  - defaults
  - bioconda
- - r
+#  - r
 dependencies:
  - r-base
  - r-readr=2.1.2

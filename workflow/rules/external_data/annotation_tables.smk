@@ -1,8 +1,18 @@
+def _params_get_ensembl(wildcards):
+  
+    if GENCODE_RELEASE.startswith('M'):
+        organism = 'mouse'
+    else:
+        organism = 'human'
+    return organism
+
 rule gtf2bed:
     input:
         'resources/external/gencode_{release}/{genome}.annotation.gtf'
     output:
         'resources/external/gencode_{release}/{genome}.transcripts.bed'
+    log:
+        'logs/external_data/gencode_{release}_{genome}_gtf2bed.log'
     shell:
         #   select colums : seqname start end strand attribute
         #   separate attributes
@@ -11,7 +21,7 @@ rule gtf2bed:
         zgrep -P "\ttranscript\t" {input} | cut -f1,4,5,7,9 | \
         sed 's/[[:space:]]/\t/g' | sed 's/[;|"]//g' | \
         awk -F $'\t' 'BEGIN {{ OFS=FS }} {{ print $1,$2-1,$3,$10,".",$4,$14,$12,$18 }}' | \
-        sort -k1,1 -k2,2n > {output}
+        sort -k1,1 -k2,2n > {output} > {log}  2>&1
         """
 
 
@@ -41,8 +51,11 @@ rule get_ensembl_geneset:
     output:
         genesetTSV = 'resources/external/ensembl/{genome}.geneset.tsv',
         transcriptsetTSV = 'resources/external/ensembl/{genome}.transcriptset.tsv'
+    log:
+        'logs/external_data/{genome}_ensembl_geneset.log'
     params: 
-        ensembl_version = config['ENSEMBL']['VERSION']
+        ensembl_version = config['ENSEMBL']['VERSION'],
+        organism = _params_get_ensembl
     threads: 6
     conda:
         '../../envs/downstream/biomart.yaml'

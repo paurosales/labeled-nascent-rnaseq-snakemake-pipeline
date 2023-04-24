@@ -1,3 +1,7 @@
+log <- file(snakemake@log[[1]], open="wt")
+sink(log)
+sink(log, type="message")
+
 suppressPackageStartupMessages({
         library(biomaRt)
         library(dplyr)
@@ -9,12 +13,12 @@ genesetTSV <- snakemake@output[["genesetTSV"]]
 transcriptsetTSV <- snakemake@output[["transcriptsetTSV"]]
 
 ensembl_version <- snakemake@params[["ensembl_version"]]
-genome_build <- snakemake@wildcards[["genome"]]
+genome_build <- snakemake@params[["organism"]]
 
-if (genome_build == "m38"){
+if (genome_build == "mouse"){
         ensembl_data <- "mmusculus_gene_ensembl"
         gene_symbol<- "mgi_symbol"
-} else if (genome_build == "hg38"){
+} else if (genome_build == "human"){
         ensembl_data <- "hsapiens_gene_ensembl"
         gene_symbol <- "hgnc_symbol"
 }

@@ -17,9 +17,9 @@ rule ngm_mapPE:
         label = '{sample_type}_{treatment}_Bio-rep_{bio_rep}'
     resources:
         mem_mb = 20000 # 8 GB for human (4 GB for genomes < 500 MBp) according to https://github.com/Cibiv/NextGenMap/wiki
-    threads: 36
+    threads: 16
     log:
-        'logs/{sample_type}_{treatment}_Bio-rep_{bio_rep}_ngm.log'
+        'logs/mapping/{sample_type}_{treatment}_Bio-rep_{bio_rep}_ngm.log'
     conda:
         '../../envs/raw_processing/slamdunk.yaml'
     shell:
@@ -29,7 +29,7 @@ rule ngm_mapPE:
             -2 {input.fq_trimmed_2}\
             -t {threads} --no-progress --slam-seq 2 -5 12\
             --rg-id {params.label} --rg-sm {params.label}:NA:-1\
-            -o {output.mapBAM} 2>&1 > {log}
+            -o {output.mapBAM} > {log}  2>&1
         """
 
 
@@ -47,7 +47,7 @@ rule slam_filter:
         max_mismatch = config['SLAM']['MAX_MISMATCH']
     resources:
         mem_mb = 8000
-    threads: 30
+    threads: 16
     conda:
         '../../envs/raw_processing/slamdunk.yaml'
     shell:

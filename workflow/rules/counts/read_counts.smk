@@ -18,7 +18,7 @@ rule slam_snp:
         var_cov = config['SLAM']['VAR_MIN_COVERAGE']
     resources:
         mem_mb = 6000
-    threads: 18
+    threads: 16
     conda:
         '../../envs/raw_processing/slamdunk.yaml'
     shell:
