@@ -6,7 +6,7 @@
 </blockquote>
 
 ## Description
-This pipeline uses the [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow manager for PE RNA sequencing data processing.
+This pipeline uses the [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow manager to precess nascent RNA samples produced from [SLAM-Seq](http://doi.org/10.1186/s12859-019-2849-7) protocol. The code is based on the [SlamDunk](https://t-neumann.github.io/slamdunk/) software tool with the pertinent adaptations for paired-end data.
 
 ## Workflow
 This is the current workflow for the snakemake rules.

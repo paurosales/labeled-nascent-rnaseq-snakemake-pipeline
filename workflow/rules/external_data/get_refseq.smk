@@ -11,7 +11,7 @@ def _params_get_seq(wildcards):
 
 rule get_genome:
     output:
-        'resources/external/gencode_{release}/{genome}_genome.fa.gz'
+        'resources/external/gencode_{release}/{genome}.genome.fa.gz'
     params:
         organism = _params_get_seq
     log:
@@ -47,16 +47,16 @@ rule get_annotation:
         http = 1
     shell:
         """
-            wget --quiet http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_{params.organism}/release_{wildcards.release}/gencode.v{wildcards.release}.annotation.gft.gz -O  {output} 2> {log}
+            wget --quiet http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_{params.organism}/release_{wildcards.release}/gencode.v{wildcards.release}.annotation.gtf.gz -O  {output} 2> {log}
         """
 
 
-rule unzip_gft:
-    input:
-        rules.get_genome.output
-    output:
-        temp('resources/external/gencode_{release}/{genome}.annotation.gtf')
-    shell:
-        """
-             gzip -dc {input} > {output}
-        """
+# rule unzip_gft:
+#     input:
+#         rules.get_genome.output
+#     output:
+#         temp('resources/external/gencode_{release}/{genome}.annotation.gtf')
+#     shell:
+#         """
+#              gzip -dc {input} > {output}
+#         """

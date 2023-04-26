@@ -75,22 +75,23 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['raw_seq'].append(str(FASTQ_DIR / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz'))
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
             TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
-            TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.filtered.bam.bai'))
-            TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / '.snp.vcf'))
-            TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.tcount.tsv'))
+            TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam.bai'))
+            TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_snp.vcf'))
+            TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount.tsv'))
             TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv'))
     else:
-            TARGETS['raw_seq'].append(str(FASTQ_DIR / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz'))
+            TARGETS['raw_seq'].append(str(FASTQ_DIR / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R2.fq.gz'))
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
             TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
-            TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.filtered.bam.bai'))
-            TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / '.snp.vcf'))
-            TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.tcount.tsv'))
+            TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam.bai'))
+            TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_snp.vcf'))
+            TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount.tsv'))
             TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv'))
-            # TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.tcount.tsv'))
-            # TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.tcount.tsv'))
+            # TARGETS['alley_rates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_overallrates.csv'))
+            # TARGETS['alley_utrrates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_mutationrates_utr.csv'))
+            # TARGETS['dif_expr'].append(str(RESULTS_DIR / 'dif_expression' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_mutationrates_utr.csv'))
+            # TARGETS['figures'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_mutationrates_utr.csv'))
             
-
     
 
 # --------------------------- Import rules ---------------------------- #
@@ -137,8 +138,12 @@ include: 'rules/counts/collapse_counts.smk'
 
 rule all:
     input:
-        expand('resources/external/gencode_{release}/{genome}_genome.fa.gz', release=GENCODE_RELEASE, genome=GENOME),
+        expand('resources/external/gencode_{release}/{genome}.genome.fa.gz', release=GENCODE_RELEASE, genome=GENOME),
+        TARGETS['raw_seq'],
         TARGETS['trimmed'],
-        TARGETS['slam_count'],
-        TARGETS['gene_counts']
+        TARGETS['slam_map'],
+        TARGETS['slam_filter'],
+        TARGETS['slam_snp'],
+        TARGETS['slam_count']
+        # TARGETS['gene_counts']
     # default_target: True

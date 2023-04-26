@@ -34,3 +34,4 @@ rule trim_galore:
             --gzip --paired --fastqc_args "--outdir {output.fastqc_dir}"\
             -o {output.out_dir} {input} > {log}  2>&1
         """
+

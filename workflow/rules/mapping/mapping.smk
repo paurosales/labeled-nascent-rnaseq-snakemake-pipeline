@@ -1,6 +1,6 @@
 # Handle wildcards errors
 def _input_refGenome(wildcards):
-    return expand('resources/external/gencode_{release}/{genome}.genome.fa', release=GENCODE_RELEASE, genome=GENOME)
+    return expand('resources/external/gencode_{release}/{genome}.genome.fa.gz', release=GENCODE_RELEASE, genome=GENOME)
 
 def _input_bedFile(wildcards):
     return expand('resources/external/gencode_{release}/{genome}.transcripts.bed', release=GENCODE_RELEASE, genome=GENOME)
@@ -9,10 +9,10 @@ def _input_bedFile(wildcards):
 rule ngm_mapPE:
     input: 
         ref_genome = _input_refGenome,
-        fq_trimmed_1 = 'results/fastq/trimmed/{sample_type}_{treatment}_Bio-rep_{bio_rep}_val_1.fq.gz',
-        fq_trimmed_2 = 'results/fastq/trimmed/{sample_type}_{treatment}_Bio-rep_{bio_rep}_val_2.fq.gz'
+        fq_trimmed_1 = 'results/fastq/trimmed/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}_val_1.fq.gz',
+        fq_trimmed_2 = 'results/fastq/trimmed/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}_val_2.fq.gz'
     output:
-        mapBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'
+        mapBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'
     params:
         label = '{sample_type}_{treatment}_Bio-rep_{bio_rep}'
     resources:
@@ -36,12 +36,12 @@ rule ngm_mapPE:
 rule slam_filter:
     input: 
         BED_file = _input_bedFile,
-        mapBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'
+        mapBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'
     output:
-        filteredBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}.filtered.bam',
-        indexBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}.filtered.bam.bai'
+        filteredBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam',
+        indexBAM = 'results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam.bai'
     params:
-        outdir = directory('results/bam_files'),
+        outdir = directory('results/bam_files/{sample_type}_{treatment}_Bio-rep_{bio_rep}'),
         min_qual = config['SLAM']['MIN_MAP_QUALITY'],
         min_ident = config['SLAM']['MIN_IDENTITY'],
         max_mismatch = config['SLAM']['MAX_MISMATCH']
