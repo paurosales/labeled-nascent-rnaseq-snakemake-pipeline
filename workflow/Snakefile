@@ -144,6 +144,6 @@ rule all:
         TARGETS['slam_map'],
         TARGETS['slam_filter'],
         TARGETS['slam_snp'],
-        TARGETS['slam_count']
-        # TARGETS['gene_counts']
+        TARGETS['slam_count'],
+        TARGETS['gene_counts']
     # default_target: True
