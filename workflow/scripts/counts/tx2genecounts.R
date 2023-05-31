@@ -24,6 +24,7 @@ tx_info <- tx_info[,c("TranscriptID", "GeneID")]
 gene_info <- read.table(genesBED, header = FALSE, sep="\t")
 names(gene_info) <- c("Chromosome", "Start", "End", "GeneID", "Score", "Strand", "GeneSize", "GeneName", "GeneType") # names must correspond to BED file colums!
 gene_info <- gene_info[,c("GeneID", "GeneSize", "GeneName", "GeneType")]
+gene_names <- gene_info[,c("GeneID", "GeneName")]
 
 norm_factor <- gene_info[,c("GeneID", "GeneSize")]
 cat("\n")
@@ -42,11 +43,12 @@ removed <-  nrow(genecounts)
 genecounts <- inner_join(tx_info, genecounts, by="TranscriptID")
 genecounts$TranscriptID <- NULL
 
+
+
 genecounts <- aggregate(.~GeneID, data = genecounts, FUN = sum)
 removed <-  removed -  nrow(genecounts)
 cat(paste("Collapsed all read counts data contains", nrow(genecounts), " transcript entries. Removed", removed, "duplicated gene entries."), sep="\n")
 cat("\n")
-
 
 
 
@@ -104,7 +106,8 @@ genecounts_ext$TcReadRange <- cut(genecounts$TcReadCount, c(0,1,2,3,6,11,26,50,1
                                         right = FALSE) # FALSE -> [x)   TRUE -> (x]  
 
 cat("\n")
-
+genecounts <- inner_join(gene_names, genecounts, by="GeneID")
+genecounts$GeneID <- NULL
 write.table(genecounts, file=genecountsTSV, sep="\t",quote=FALSE, row.names=FALSE)
 
 write.table(genecounts_ext, file=genecountsExtTSV, sep="\t",quote=FALSE, row.names=FALSE)

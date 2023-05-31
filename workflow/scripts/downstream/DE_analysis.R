@@ -15,18 +15,19 @@ suppressPackageStartupMessages({
         library(ggrepel)
 })
 
+
 ######################
 # Snakemake parse
 ######################
-countFolder <- snakemake@input[["indir"]]
-sample_man <- snakemake@input[["sample_manifest"]] # [opt$design] sample_manifest like cols: group, condition, control (binary), reads
+countFiles <- snakemake@input[["countFiles"]]
+sample_man <- snakemake@input[["sample_manifest"]]
 
 data_outdir <- snakemake@output[["data_outdir"]] # for contrast tables
 fig_outdir <- snakemake@output[["fig_outdir"]] # for plots
+ddsRDS <- snakemake@output[["ddsRDS"]]
 
 subgroup <- snakemake@params[["subgroup_filter"]] # group of interest ADD CONDITONAL TO ALL GROUPS
 pval_th <- snakemake@params[["pval_threshold"]]
-
 
 ######################
 # Functions
@@ -36,52 +37,53 @@ pval_th <- snakemake@params[["pval_threshold"]]
 
 parseSample <- function(file) {
 
-  con <- file(file,"r")
-  name <- readLines(con,n=1)
-  name = sub(".*name:","",name)
-  close(con)
-
-  countTab = read_tsv(file,comment="#")
+  # con <- file(file,"r")
+  # name <- readLines(con,n=1)
+  # name = sub(".*name:","",name)
+  # close(con)
+  name = tail(unlist(strsplit(file, "/")), n=1)
+  name = unlist(strsplit(name, "[.]"))[1]
+  countTab = read_tsv(file)
 
   countTab = countTab %>%
-    mutate(RPM = readCount / sum(readCount) * 1e6) %>%
-    dplyr::select(gene_name, readCount, tcReadCount, RPM)
+    mutate(RPM = ReadCount / sum(ReadCount) * 1e6) %>%
+    dplyr::select(GeneName, ReadCount, TcReadCount, RPM)
 
 
-  names(countTab) = c("gene_name", paste0(name,"_total"),paste0(name,"_tc"), paste0(name,"_RPM"))
+  names(countTab) = c("GeneName", paste0(name,"_total"),paste0(name,"_tc"), paste0(name,"_RPM"))
 
   return(countTab)
 }
 
 # Function to run DESeq2
 
-deAnalysis <- function(counts, design) {
+deAnalysis <- function(counts, sample_info) {
 
   countData.total <- counts %>%
     dplyr::select(contains("_total")) %>%
     as.matrix
 
-  row.names(countData.total) <- counts$gene_name
+  row.names(countData.total) <- counts$GeneName
 
   countData <- counts %>%
     dplyr::select(contains("_tc")) %>%
     as.matrix
 
-  row.names(countData) <- counts$gene_name
+  row.names(countData) <- counts$GeneName
 
   sampleOrder = sub("_tc","",colnames(countData))
 
-  design = design[match(sampleOrder,design$name),]
-
+  sample_info = sample_info[match(sampleOrder, sample_info$Sample_name),]
+  
   dds <- DESeqDataSetFromMatrix(countData = countData,
-                                colData = design,
-                                design = ~ condition)
+                                colData = sample_info,
+                                design = ~ Treatment)
 
   row.names(dds) = row.names(countData)
 
   dds.total <- DESeqDataSetFromMatrix(countData = countData.total,
-                                      colData = design,
-                                      design = ~ condition)
+                                      colData = sample_info,
+                                      design = ~ Treatment)
 
   dds.total <- dds.total[ rowSums(counts(dds)) > 0, ] #  remove uninformative rows
 
@@ -104,7 +106,7 @@ getContrast <- function(counts, dds, case, control) {
                                        case,
                                        control))
 
-  results <- data.frame(gene_name = as.character(rownames(dds)),
+  results <- data.frame(GeneName = as.character(rownames(dds)),
                         log2FC_deseq2 = results$log2FoldChange,
                         padj = results$padj)
 
@@ -113,12 +115,12 @@ getContrast <- function(counts, dds, case, control) {
   #  Calculate mean baseline expression (mean RPM of untreated samples).
 
   ctrl = control
-  ctrl = design %>%
+  ctrl = sample_info %>%
     dplyr::filter(condition == ctrl) %>%
-    .$name %>%
+    .$Sample_name %>%
     paste0(.,"_RPM")
 
-  avg.RPM <- data.frame(gene_name = as.character(counts$gene_name),
+  avg.RPM <- data.frame(GeneName = as.character(counts$GeneName),
                         avg.RPM.ctrl = counts %>%
                           dplyr::select(all_of(ctrl)) %>%
                           rowMeans
@@ -127,7 +129,7 @@ getContrast <- function(counts, dds, case, control) {
   #  Intersect with baseline expression and gene symbols and export as table.
 
   export.deseq2 <- left_join(results,avg.RPM) %>%
-    dplyr::select(gene_name, everything()) %>%
+    dplyr::select(GeneName, everything()) %>%
     arrange(padj,log2FC_deseq2)
 }
 
@@ -148,16 +150,16 @@ MAPlot <- function(export.deseq2, case, control, cutoff) {
 
   x <- log10(export.deseq2$avg.RPM.ctrl) # x-axis: baseline mRNA expression
   y <- export.deseq2$log2FC_deseq2 # y-axis: log2 fold-change treated/ctrl
-  gene_name <- export.deseq2$gene_name
+  GeneName <- export.deseq2$GeneName
   d <- densCols(x, y, nbin = 100,
                 colramp = colorRampPalette((brewer.pal(9,"Greys")[-c(1:5)])))
-  df <- data.frame(x, y, d, gene_name)
+  df <- data.frame(x, y, d, GeneName)
 
   ### Generate unlabeled plot with accurate marginal density for use in figures.
 
   # Generate basic MA-like plot with density coloring.
 
-  p <- ggplot(df, aes(x = x, y = y, label = gene_name)) +
+  p <- ggplot(df, aes(x = x, y = y, label = GeneName)) +
     theme_classic() +
     scale_color_identity() +
     labs(x = "average expression total mRNA (RPM)", y = "log2FC")
@@ -187,7 +189,7 @@ MAPlot <- function(export.deseq2, case, control, cutoff) {
 
   #  Generate basic MA-like plot with density coloring.
 
-  p <- ggplot(df, aes(x = x, y = y, label = gene_name)) +
+  p <- ggplot(df, aes(x = x, y = y, label = GeneName)) +
     theme_classic() +
     scale_color_identity() +
     labs(x = "average expression total mRNA (RPM)", y = "log2FC") +
@@ -224,16 +226,16 @@ MAPlot <- function(export.deseq2, case, control, cutoff) {
   if(nrow(dereg) > 0){
 
     p.highlight <- p +
-      geom_point(data = df[!(df$gene_name %in% dereg$gene_name),],
+      geom_point(data = df[!(df$GeneName %in% dereg$GeneName),],
                  aes(x, y, col = "gray60"), size = 1.3, shape =16) +
-      geom_point(data = df[df$gene_name %in% dereg$gene_name,],
+      geom_point(data = df[df$GeneName %in% dereg$GeneName,],
                  aes(x, y, col = "red1"), size = 1.3, shape =16) +
       geom_abline(aes(intercept = -1, slope = 0), size = 0.8, linetype = 3) +
       geom_hline(yintercept = 0, size = 0.8) +
       geom_abline(aes(intercept = 1, slope = 0), size = 0.8, linetype = 3)
 
     p.highlight.2 <- p.highlight +
-      geom_label_repel(data = df[df$gene_name %in% top.dereg,])
+      geom_label_repel(data = df[df$GeneName %in% top.dereg,])
 
     #  Export plot.
 
@@ -247,78 +249,95 @@ MAPlot <- function(export.deseq2, case, control, cutoff) {
 }
 
 ######################
-# Read design + counts
+# Read sample_info + counts
 ######################
+cat("Reading sample counts...",  sep="\n")
 
-design = read_tsv(sample_man)
+sample_info = read.table(sample_man, header=TRUE, sep="\t")
 
-design = design %>%
-    if(subgroup != ""){
-        filter(group == subgroup)
-        }
-#   filter(group == opt$group) 
+sample_info$Sample_name <- paste(sample_info$Sample_type, "_", sample_info$Treatment, "_Bio-rep_", sample_info$Bio_rep, sep="")
 
-if (nrow(design) == length(unique(design$condition))) {
+if (nrow(sample_info) == length(unique(sample_info$Treatment))) {
   quit(save = "no", status = 0, runLast = TRUE)
 }
 
-countFiles = list.files(countFolder, pattern = ".csv")
-
-counts = parseSample(file.path(countFolder,countFiles[1]))
+counts = parseSample(file.path(countFiles[1]))
 
 if(length(countFiles) > 1) {
 
   for (i in 2:length(countFiles)) {
-    counts = counts %>% inner_join(parseSample(file.path(countFolder,countFiles[i])), by = "gene_name")
+    counts = counts %>% inner_join(parseSample(file.path(countFiles[i])), by = "GeneName") # may give error due to ensembl_id
   }
 }
-
+cat("\n")
 ######################
 # Run DESeq2
 ######################
 
-dds <- deAnalysis(counts, design)
-
+head(counts)
+print(sample_info)
+cat("Running DESeq2...",  sep="\n")
+dds <- deAnalysis(counts, sample_info)
+cat("\n")
 #  Export PCA plot (default deseq PCA on 500 most variable genes).
 
+cat("Generating PCA plots...",  sep="\n")
 if (!dir.exists(fig_outdir)) { dir.create(fig_outdir) }
 
 pdf(file.path(fig_outdir,"PCA.pdf"))
 
-plotPCA(varianceStabilizingTransformation(dds), intgroup = "condition")
+plotPCA(varianceStabilizingTransformation(dds), intgroup = "Treatment")
 
 dev.off()
+cat("\n")
 
-ctrl = design %>%
-  filter(control == 1) %>%
-  .$condition %>%
+cat("Generation contrasts...",  sep="\n")
+colData(dds)
+colData(dds)$Treatment
+
+ctrl = sample_info %>%
+  filter(Control == 1) %>%
+  .$Treatment %>%
   unique
 
-cases = design %>%
-  filter(control == 0) %>%
-  .$condition %>%
+cases = sample_info %>%
+  filter(Control == 0) %>%
+  .$Treatment %>%
   unique
 
+cat("\n")
+i <- 1
 for (case in cases) {
-
+  
   if (!dir.exists(file.path(data_outdir,case))) { dir.create(file.path(data_outdir,case)) }
 
   ######################
   # Extract contrasts
   ######################
-
+  cat(paste("Extracting contrast for ", ctrl, "_vs_", case, "...", sep=""), sep="\n")
   export.deseq2 <- getContrast(counts, dds, case, ctrl) # CHANGE NAME SIGNIF
 
   write_tsv(export.deseq2,
             file.path(data_outdir,case,"DESeq2.txt")
   )
-
+  cat("\n")
   ######################
   # Plot results
   ######################
+  cat("\tGenerating MA plot...",  sep="\n")
 
   pdf(file.path(fig_outdir,case,"MAPlot.pdf"))
   MAPlot(export.deseq2, case, ctrl, pval_th)
   dev.off()
-
+  cat(paste(i, "/", length(cases), " done!", sep=""), sep="\n")
+  cat("\n")
+  i <- i+1
 }
+
+cat("\n")
+
+cat("Saving output data...",  sep="\n")
+saveRDS(dds, file = ddsRDS)
+cat("\n")
+
+cat("DONE!", sep="\n")

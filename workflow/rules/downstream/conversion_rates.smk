@@ -1,9 +1,9 @@
 # Handle wildcards errors
 def _input_refGenome(wildcards):
-    return expand('resources/external/gencode/Mus_musculus.GRC{genome}.primary_assembly.genome.fa', genome=GENOME)
+    return expand('resources/external/gencode_{release}/{genome}.genome.fa', release=GENCODE_RELEASE, genome=GENOME)
 
 def _input_bedFile(wildcards):
-    return expand('resources/external/gencode/Mus_musculus.GRC{genome}.transcripts.bed', genome=GENOME)
+    return expand('resources/external/gencode_{release}/{genome}.transcripts.bed', release=GENCODE_RELEASE, genome=GENOME)
 
 
 
@@ -12,18 +12,21 @@ rule alley_rates:
         filteredBAM = rules.slam_filter.output.filteredBAM,
         ref_genome = _input_refGenome
     output:
-        'results/alleyoop/rates/{label}_mapped_filtered_overallrates.csv'
+        'results/conversion_rates/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}_overallrates.csv',
+        'results/conversion_rates/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}_overallrates.pdf'
     params:
-        outdir = 'results/alleyoop/rates',
-        extra_params = ''  # [-mq <MQ cutoff>]
+        outdir = 'results/conversion_rates/{sample_type}_{treatment}_Bio-rep_{bio_rep}',
+        min_qual = config['SLAM']['MIN_QUAL']
     resources:
         mem_mb = 2000
     threads: 6 
     conda:
-        '../envs/slamdunk.yaml'
+        '../../envs/raw_processing/slamdunk.yaml'
     shell:
         """
-            alleyoop rates -o {params.outdir} -r {input.ref_genome} -t {threads} {params.extra_params} {input.filteredBAM}
+            alleyoop rates -o {params.outdir} -r {input.ref_genome} \
+            -t {threads} -mq {params.min_qual} \
+            {input.filteredBAM}
         """
 
 rule alley_utrrates:
@@ -31,18 +34,22 @@ rule alley_utrrates:
         filteredBAM = rules.slam_filter.output.filteredBAM,
         ref_genome = _input_refGenome
     output:
-        'results/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.csv',
-        'results/alleyoop/utrrates/{label}_mapped_filtered_mutationrates_utr.pdf'
+        'results/conversion_rates/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}_mutationrates_utr.csv',
+        'results/conversion_rates/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}_mutationrates_utr.pdf'
     params:
-        outdir = 'results/alleyoop/utrrates',
+        outdir = 'results/conversion_rates/{sample_type}_{treatment}_Bio-rep_{bio_rep}',
         BED_file = _input_bedFile,
-        extra_params = '-l 100 -m'  # [-mq <MQ cutoff> default = 27] [-m]
+        min_qual = config['SLAM']['MIN_QUAL'],
+        max_len = config['SLAM']['MAX_LENGTH']
     resources:
         mem_mb = 12000
     threads: 6 
     conda:
-        '../envs/slamdunk.yaml'
+        '../../envs/raw_processing/slamdunk.yaml'
     shell:
         """
-            alleyoop utrrates -o {params.outdir} -r {input.ref_genome} -b {params.BED_file} -t {threads} {params.extra_params} {input.filteredBAM}
+            alleyoop utrrates -o {params.outdir} -r {input.ref_genome} \
+            -b {params.BED_file} -t {threads} \
+            -l {params.max_len} -m {params.min_qual} \
+            {input.filteredBAM}
         """

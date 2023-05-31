@@ -43,7 +43,7 @@ rule slam_count:
         min_qual = config['SLAM']['MIN_QUAL']
     resources:
         mem_mb = 8000
-    threads: 30
+    threads: 15
     conda:
         '../../envs/raw_processing/slamdunk.yaml'
     shell:
