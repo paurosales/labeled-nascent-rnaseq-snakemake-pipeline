@@ -61,7 +61,8 @@ TARGETS = {'raw_seq': [],
             'slam_filter': [],
             'slam_snp': [],
             'slam_count': [],
-            'gene_counts': []
+            'gene_counts': [],
+            'dif_expr': []
             }
 
 # as array for different genomes?
@@ -79,6 +80,7 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_snp.vcf'))
             TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount.tsv'))
             TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv'))
+            TARGETS['dif_expr'].append(str(RESULTS_DIR / 'dif_expr/dds.Rds'))
     else:
             TARGETS['raw_seq'].append(str(FASTQ_DIR / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R2.fq.gz'))
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
@@ -87,9 +89,9 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_snp.vcf'))
             TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount.tsv'))
             TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv'))
+            TARGETS['dif_expr'].append(str(RESULTS_DIR / 'dif_expr/dds.Rds'))
             # TARGETS['alley_rates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_overallrates.csv'))
             # TARGETS['alley_utrrates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_mutationrates_utr.csv'))
-            # TARGETS['dif_expr'].append(str(RESULTS_DIR / 'dif_expression' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_mutationrates_utr.csv'))
             # TARGETS['figures'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_mutationrates_utr.csv'))
             
     
@@ -107,7 +109,7 @@ include: 'rules/counts/collapse_counts.smk'
 # --------- Downstream analysis
 # include: 'rules/plots.smk'
 # include: 'rules/conversion_rates.smk'
-# include: 'rules/downstream/DE_analysis.smk'
+include: 'rules/downstream/DE_analysis.smk'
 
 # --------------------------- Rules ---------------------------- #
 
@@ -145,5 +147,7 @@ rule all:
         TARGETS['slam_filter'],
         TARGETS['slam_snp'],
         TARGETS['slam_count'],
-        TARGETS['gene_counts']
+        TARGETS['gene_counts'],
+        TARGETS['dif_expr']
+
     # default_target: True

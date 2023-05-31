@@ -31,7 +31,7 @@ TRIM_GALORE:
 #    lenght: 20
 
 SLAM:
-    MAX_LENGTH: 100
+    MAX_LENGTH: 100 # [also used for alleyoop]
 # -- Filter --
     MIN_MAP_QUALITY: 2 # (default: 2)
     MIN_IDENTITY: 0.95 # (default: 0.95)
@@ -41,8 +41,7 @@ SLAM:
     VAR_FRACTION: 0.2 # for diploids use 0.2 # (default: 0.8)
 # -- Count --
     CONVERSION_THRESHOLD: 2 # (default: 1)
-    MIN_QUAL: 27 # min base quality for T -> C conversions (default:27)
-
+    MIN_QUAL: 27 # min base quality for T -> C conversions (default:27) [also used for alleyoop]
 
 # --------------------------- Params for downstream analysis ---------------------------- #
 

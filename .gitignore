@@ -2,4 +2,7 @@ results/*
 resources/*
 logs/*
 config/sample_manifest.tsv
+config/config.tsv
 .snakemake
+*.pdf
+*.svg
