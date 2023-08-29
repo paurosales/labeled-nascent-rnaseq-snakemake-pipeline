@@ -16,7 +16,7 @@ min_version('6.8.0')
 
 
 # Load and read Snakemake config 
-configfile: 'config/config_template.yaml'
+configfile: 'config/config.yaml'
 
 # --------------------------- Read config file ---------------------------- #
 
@@ -36,6 +36,7 @@ SUBSET_COLUMN = config['SUBSET_COLUMN']
 
 # --------------------------- Read sample manifest ---------------------------- #
 SAMPLE_MANIFEST = pd.read_table(Path(config['SAMPLE_MANIFEST']))
+SAMPLE_MANIFEST['Bio_rep'] = SAMPLE_MANIFEST.Bio_rep.astype(str)
 
 # Specify the sample info combinations to use as label per sample
 SAMPLES = SAMPLE_MANIFEST.set_index(['Sample_type',
@@ -56,6 +57,7 @@ GENCODE_VERSIONS = {
 
 # Output files dictionary
 TARGETS = {'raw_seq': [], 
+            'merged_fq': [],
             'trimmed': [],
             'slam_map': [],
             'slam_filter': [],
@@ -70,10 +72,13 @@ GENCODE_RELEASE = pd.unique(SAMPLES['Target_genome'])[0]
 GENOME = GENCODE_VERSIONS[GENCODE_RELEASE]
 
 for sample_type, treatment, bio_rep in SAMPLES.index:
+    identifier = SAMPLES.loc[(sample_type, treatment, bio_rep), 'Identifier']
+    handle = SAMPLES.loc[(sample_type, treatment, bio_rep), 'Fastq_handle']
     # Select samples with specified value on a given column in the sample manifest (USE CONFIG FILE TO SELECT)
     if SUBSET_COLUMN:
         if SAMPLES.loc[(sample_type, treatment, bio_rep), SUBSET_COLUMN] == config['SUBSET_VALUE']: 
-            TARGETS['raw_seq'].append(str(FASTQ_DIR / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz'))
+            TARGETS['raw_seq'].append(str(FASTQ_DIR / 'raw'/ f'{identifier}_S{handle}_L002_R2_001.fastq.gz'))
+            TARGETS['merged_fq'].append(str(FASTQ_DIR / 'merged'/ f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R2.fq.gz'))
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
             TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
             TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam.bai'))
@@ -82,7 +87,8 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv'))
             TARGETS['dif_expr'].append(str(RESULTS_DIR / 'dif_expr/dds.Rds'))
     else:
-            TARGETS['raw_seq'].append(str(FASTQ_DIR / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R2.fq.gz'))
+            TARGETS['raw_seq'].append(str(FASTQ_DIR / 'raw'/ f'{identifier}_S{handle}_L002_R2_001.fastq.gz'))
+            TARGETS['merged_fq'].append(str(FASTQ_DIR / 'merged'/ f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R2.fq.gz'))
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
             TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
             TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam.bai'))
@@ -99,6 +105,7 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
 # --------------------------- Import rules ---------------------------- #
 
 # --------- Raw procesing 
+include: 'rules/external_data/merge_lanes.smk'
 include: 'rules/external_data/get_refseq.smk'
 include: 'rules/mapping/trim_galore.smk'
 include: 'rules/mapping/mapping.smk'
@@ -114,40 +121,37 @@ include: 'rules/downstream/DE_analysis.smk'
 # --------------------------- Rules ---------------------------- #
 
 
-# rule multiqc_report:
-#     output:
-#         base = directory(str(REPORT_DIR / 'multiqc'))
-#     params:
-#         title = 'MultiQC report: SLAM-Seq data'
-#     conda:
-#         'envs/quality_control/multiqc.yaml'
-#     log:
-#         str(LOG_DIR / 'multiqc' / 'multiqc.log')
-#     shell:
-#         """
-#         multiqc -o {output.base} -n multiqc_report.html\
-#         -m fastqc -m cutadapt -m slamdunk -f\
-#         --title {params.title}\
-#         {REPORT_DIR} {RESULTS_DIR} {LOG_DIR} &> {log}
-#         """
-#     shell:
-#         """
-#         multiqc --force --interactive \
-#         -o {output.base} -n multiqc_report.html \
-#         {REPORT_DIR} {RESULTS_DIR} {LOG_DIR} &> {log}
-#         """
+rule multiqc_report:
+    input:
+        TARGETS['trimmed'],
+        TARGETS['slam_map'],
+        TARGETS['slam_filter']
+    output:
+        base = directory(str(REPORT_DIR / 'multiqc'))
+    conda:
+        'envs/quality_control/multiqc.yaml'
+    log:
+        str(LOG_DIR / 'multiqc' / 'multiqc.log')
+    shell:
+        """
+        multiqc --force --interactive \
+        -o {output.base} -n multiqc_report.html \
+        -m fastqc -m cutadapt -m slamdunk -f \
+        {REPORT_DIR} {RESULTS_DIR} {LOG_DIR} &> {log}
+        """
 
 
 rule all:
     input:
         expand('resources/external/gencode_{release}/{genome}.genome.fa.gz', release=GENCODE_RELEASE, genome=GENOME),
         TARGETS['raw_seq'],
+        TARGETS['merged_fq'],
         TARGETS['trimmed'],
         TARGETS['slam_map'],
         TARGETS['slam_filter'],
         TARGETS['slam_snp'],
         TARGETS['slam_count'],
         TARGETS['gene_counts'],
-        TARGETS['dif_expr']
-
-    # default_target: True
+        # TARGETS['dif_expr']
+        str(REPORT_DIR / 'multiqc')
+    default_target: True
