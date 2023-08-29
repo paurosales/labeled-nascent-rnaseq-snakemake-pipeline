@@ -28,7 +28,6 @@ TRIM_GALORE:
 #    lenght: 20
 
 SLAM:
-    MAX_LENGTH: 100 # [also used for alleyoop]
 # -- Filter --
     MIN_MAP_QUALITY: 2 # (default: 2)
     MIN_IDENTITY: 0.95 # (default: 0.95)

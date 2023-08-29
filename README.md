@@ -26,6 +26,7 @@ This is the current workflow for the snakemake rules.
     5. **Target_genome:** ENCODE target genome for sequencing (*supported options:* M1, M25, 19, 38)
     6. **Sequencer**: Sequencer to define —2colour parameter for the trimming (*supported options:* HiSeq4000, NovaSeq, NextSeq500)
     6. **Seq_mode**: Library preparation strategy (*supported options:* mRNA, totalRNA)
+    6. **Seq_length**: Sequencing length
     7. **Group:** Single factor defined by important characteristics for 1-1 comparisons for downstream analysis (A, B, C…)
     8. **Pair:** Two factor combination indicating which samples should be compared using the code (AB, AC, BC…)
     9. **Fastq_handle:** Particular handle useful for raw `.fastq.gz` files selection using the name from the facility (number, extension, etc.)
