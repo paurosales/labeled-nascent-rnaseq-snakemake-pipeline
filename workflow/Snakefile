@@ -89,6 +89,8 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
             TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
             TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam.bai'))
+            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_fwd.bw'))
+            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_rev.bw'))
             TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_snp.vcf'))
             TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount.tsv'))
             # TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv'))
@@ -109,6 +111,8 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
             TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
             TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam.bai'))
+            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_fwd.bw'))
+            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_rev.bw'))
             TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_snp.vcf'))
             TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount.tsv'))
             # TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv'))
@@ -138,6 +142,7 @@ include: 'rules/external_data/annotation_tables.smk'
 include: 'rules/counts/collapse_counts.smk'
 
 # --------- Downstream analysis
+include: 'rules/tracks/deeptools.smk'
 include: 'rules/downstream/conversion_rates.smk'
 include: 'rules/downstream/read_content_qc.smk'
 include: 'rules/downstream/summary.smk'
@@ -150,7 +155,16 @@ rule multiqc_report:
     input:
         TARGETS['trimmed'],
         TARGETS['slam_map'],
-        TARGETS['slam_filter']
+        TARGETS['slam_filter'],
+        TARGETS['deeptools'],
+        TARGETS['slam_snp'],
+        TARGETS['slam_count'],
+        TARGETS['alley_rates'],
+        TARGETS['alley_utrrates'],
+        TARGETS['alley_snpeval'],
+        TARGETS['alley_tcperreadpos'],
+        TARGETS['alley_tcperutrpos']
+        # TARGETS['summary']
     output:
         base = directory(str(REPORT_DIR / 'multiqc'))
     conda:
@@ -174,6 +188,7 @@ rule all:
         TARGETS['trimmed'],
         TARGETS['slam_map'],
         TARGETS['slam_filter'],
+        TARGETS['deeptools'],
         TARGETS['slam_snp'],
         TARGETS['slam_count'],
         # TARGETS['gene_counts'],
