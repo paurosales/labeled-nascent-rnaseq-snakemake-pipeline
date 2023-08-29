@@ -64,8 +64,6 @@ TARGETS = {'raw_seq': [],
             'deeptools:': [],
             'slam_snp': [],
             'slam_count': [],
-            # 'gene_counts': [],
-            # 'dif_expr': [],
             'alley_rates': [],
             'alley_utrrates': [],
             'alley_snpeval': [],
@@ -94,7 +92,6 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_rev.bw'))
             TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_snp.vcf'))
             TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount.tsv'))
-            # TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv'))
             TARGETS['alley_collapse'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount_collapsed.csv'))
             TARGETS['alley_rates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_overallrates.csv'))
             TARGETS['alley_utrrates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_mutationrates_utr.csv'))
@@ -105,7 +102,6 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['merge'].append(str(RESULTS_DIR / 'counts' / 'count_mtx.tsv'))
             TARGETS['merge'].append(str(RESULTS_DIR / 'counts' / 'count_mtx_total.tsv'))
             TARGETS['merge'].append(str(RESULTS_DIR / 'counts' / 'count_mtx_tc.tsv'))
-            TARGETS['dif_expr'].append(str(RESULTS_DIR / 'dif_expr/dds.Rds'))
     else:
             TARGETS['raw_seq'].append(str(FASTQ_DIR / 'raw'/ f'{identifier}_S{handle}_L002_R2_001.fastq.gz'))
             TARGETS['merged_fq'].append(str(FASTQ_DIR / 'merged'/ f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R2.fq.gz'))
@@ -116,7 +112,6 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_rev.bw'))
             TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_snp.vcf'))
             TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount.tsv'))
-            # TARGETS['gene_counts'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.genecount.tsv'))
             TARGETS['alley_collapse'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount_collapsed.csv'))
             TARGETS['alley_rates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_overallrates.csv'))
             TARGETS['alley_utrrates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_mutationrates_utr.csv'))
@@ -127,7 +122,6 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['merge'].append(str(RESULTS_DIR / 'counts' / 'count_mtx.tsv'))
             TARGETS['merge'].append(str(RESULTS_DIR / 'counts' / 'count_mtx_total.tsv'))
             TARGETS['merge'].append(str(RESULTS_DIR / 'counts' / 'count_mtx_tc.tsv'))
-            TARGETS['dif_expr'].append(str(RESULTS_DIR / 'dif_expr/dds.Rds'))
 
 
 
@@ -192,7 +186,6 @@ rule all:
         TARGETS['deeptools'],
         TARGETS['slam_snp'],
         TARGETS['slam_count'],
-        # TARGETS['gene_counts'],
         TARGETS['alley_collapse'],
         TARGETS['alley_rates'],
         TARGETS['alley_utrrates'],
@@ -201,6 +194,5 @@ rule all:
         TARGETS['alley_tcperutrpos'],
         TARGETS['summary'],
         TARGETS['merge'],
-        # TARGETS['dif_expr']
         str(REPORT_DIR / 'multiqc')
     default_target: True

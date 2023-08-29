@@ -46,12 +46,3 @@ BAM_COVERAGE:
     MIN_MAPQ: 20
     NORM_METHOD: 'None' # options: RPKM, CPM, BPM, RPGC, None
     EXTRA: ''
-    
-ENSEMBL:
-    VERSION: 108
-
-DESEQ2:
-    SUBSET_FILTER: '' # leave empty if no subgroup requiered, or fill with corresponding group on sample_manifest.tsv
-    PVAL_THRESHOLD: 0.05
-    # PADJ_THRESHOLD: 1
-    # PADJ_THRESHOLD: 0.05
