@@ -101,7 +101,7 @@ This is the current workflow for the snakemake rules.
 Paulina Rosales, Kevin Brokers & Robert Schneider
 
 ## Contact
-paulina.rosales@helmholtz-muenchen.de
+paulina.rosales@helmholtz-munich.de
 
 ## Project status
 
