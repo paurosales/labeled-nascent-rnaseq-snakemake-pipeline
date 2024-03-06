@@ -1,4 +1,4 @@
-# SLAM-Seq analysis pipeline for paired-end data
+# T-to-C nucelotide conversion detection for nascent RNA analysis pipeline
 
 <blockquote class="callout warning">
   <h4>⚠️ Warning</h4>
@@ -6,16 +6,11 @@
 </blockquote>
 
 ## Description
-This pipeline uses the [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow manager to precess nascent RNA samples produced from [SLAM-Seq](http://doi.org/10.1186/s12859-019-2849-7) protocol. The code is based on the [SlamDunk](https://t-neumann.github.io/slamdunk/) software tool with the pertinent adaptations for paired-end data.
-
-## Workflow
-This is the current workflow for the snakemake rules.
-
-<!--> ![rulegraph](./snakeflow.svg) -->
+This pipeline uses the [Snakemake](https://snakemake.readthedocs.io/en/stable/) workflow manager to process RNA-seq data from [SLAM-Seq](http://doi.org/10.1186/s12859-019-2849-7) or [TimeLapse-seq](https://www.nature.com/articles/nmeth.4582) RNA metabolic labeling protocols, based on the **detection of T-to-C nucleotide conversions** for nascent RNA identification. The code is based on the [SlamDunk](https://t-neumann.github.io/slamdunk/) software tool with the pertinent adaptations for **paired-end data and multime sequencing strategies**.
 
 
 ## Getting started
-1. Fork the pipeline to create your own project repo.
+1. Use this template to create your own project repo.
 
 2. Create the `config/sample_manifest.tsv` using the following structure:
 
@@ -23,18 +18,19 @@ This is the current workflow for the snakemake rules.
     2. **Sample_type:** Tissue, cell type, etc.
     3. **Treatment**: Condition (treated/untreated, fed/starved, etc.)
     4. **Bio_rep:** Biological replicate number
-    5. **Target_genome:** ENCODE target genome for sequencing (*supported options:* M1, M25, 19, 38)
-    6. **Sequencer**: Sequencer to define —2colour parameter for the trimming (*supported options:* HiSeq4000, NovaSeq, NextSeq500)
-    6. **Seq_mode**: Library preparation strategy (*supported options:* mRNA, totalRNA)
-    6. **Seq_length**: Sequencing length
-    7. **Group:** Single factor defined by important characteristics for 1-1 comparisons for downstream analysis (A, B, C…)
-    8. **Pair:** Two factor combination indicating which samples should be compared using the code (AB, AC, BC…)
-    9. **Fastq_handle:** Particular handle useful for raw `.fastq.gz` files selection using the name from the facility (number, extension, etc.)
+    5. **Labeling_method:** Metabolic labeling method (SLAMseq or TimeLapse)
+    6. **Labeling_time:** Incubation time for methabolic labeling
+    7. **Target_genome:** ENCODE target genome for sequencing (*supported options:* M25, M32, 19, 38)
+    8. **Sequencer**: Sequencer to define —2colour parameter for the trimming (*supported options:* HiSeq4000, NovaSeq, NextSeq500, NovaSeqX)
+    9. **Seq_mode**: Library preparation strategy (*supported options:* mRNA, totalRNA)
+    10. **Seq_length**: Sequencing length
+    11. **Fastq_handle:** Particular handle useful for raw `.fastq.gz` files selection using the name from the sequencing facility (number, extension, etc.)
+    12. **Fastq_lanes:** Number of `.fastq.gz` files lanes from the sequencing facility (used for `merge_fq_lanes` rule)
 
    
      > Sample manifest example available [here](./config/sample_manifest_example.tsv).
 
-3. Copy your raw sequencing data to `resources/raw_data`, the names of the files must correspond to the values indicated on the sample manifest columns, using the following structure:
+3. Copy your raw sequencing data to `resources/fastq_seq/raw`, the names of the files must correspond to the values indicated on the sample manifest columns, using the following structure:
 
     ```
         # Read 1
@@ -60,16 +56,17 @@ This is the current workflow for the snakemake rules.
         ├── profiles
         |   └── profile
         ├── resources
-        |   └── raw_data
-        |        ├── {Sample_type}_{Treatment}_Bio-rep_{Bio_rep}_R1.fastq.gz
-        |        └── {Sample_type}_{Treatment}_Bio-rep_{Bio_rep}_R2.fastq.gz
+        |   └── fastq_seq
+        |       └── raw
+        |            ├── {Sample_type}_{Treatment}_Bio-rep_{Bio_rep}_R1.fastq.gz
+        |            └── {Sample_type}_{Treatment}_Bio-rep_{Bio_rep}_R2.fastq.gz
         └── workflow
     ```
 
     Use the following command on your project folder:
 
     ```
-        snakemake --profile profiles/<YOUR_PROFILE> --use-conda -j<N_JOBS>
+        snakemake --profile profiles/<YOUR_PROFILE> -j<N_JOBS>
     ```
 
     > For more options check the [--help](https://snakemake.readthedocs.io/en/stable/executing/cli.html)
@@ -77,7 +74,7 @@ This is the current workflow for the snakemake rules.
     
 ## Important notes
 
-- This pipeline only works with _paired-end_ Illumnia sequencing reads <!-- and trimming depending on the specified `Sequencer` in a color-chemistry aware mode. -->
+- This pipeline only works with _paired-end_ Illumnia sequencing reads.
 
 
 - The default configurations for this workflow are suitable to run snakemake on the `Helmholtz-Munich HPC` and using `conda` to deal with software dependencies. If one wishes to run the pipeline on a different computing platform, the profiles need to be adapted accordingly.
@@ -93,15 +90,10 @@ This is the current workflow for the snakemake rules.
     | Human | 19 | GRCh37 | h19 |
     | Human | 38 | GRCh38 | h38 |
 
-<!-->    | Mouse | M1 | NCBI27 | 65 | mm9 | -->
-
 
 ## Authors and acknowledgment
 
-Paulina Rosales, Kevin Brokers & Robert Schneider
+Paulina Rosales-Becerra, Kevin Brokers & Robert Schneider
 
 ## Contact
 paulina.rosales@helmholtz-munich.de
-
-## Project status
-

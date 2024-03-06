@@ -1,3 +1,3 @@
-Identifier	Sample_type	Treatment	Bio_rep	Target_genome	Sequencer	Seq_mode	Seq_length	Group	Pair	Fastq_handle
-22L016498	mESC	untreated	1	M25	NovaSeq	totalRNA	150	A	AB	29.fastq.gz
-22L016499	mESC	auxin-treated	1	M25	NovaSeq	totalRNA	150	B	AB	30.fastq.gz
+Identifier	Sample_type	Treatment	Bio_rep	Labeling_method	Labeling_time	Target_genome	Sequencer	Seq_mode	Seq_length	Fastq_handle	Fastq_lanes
+22L016498	mESC	untreated	1	SLAM	1h	M25	NovaSeq	totalRNA	150	29.fastq.gz	2
+22L016499	mESC	KO	1	SLAM	1h	M25	NovaSeq	totalRNA	150	30.fastq.gz	2

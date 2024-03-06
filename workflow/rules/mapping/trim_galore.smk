@@ -23,6 +23,9 @@ def _params_trim_galore(wildcards):
 
     elif _sequencer == 'NextSeq500':
         quality = f'--2colour {qual_th}'
+    
+    elif _sequencer == 'NovaSeqX':
+    quality = f'--2colour {qual_th}'
 
     return quality
 
