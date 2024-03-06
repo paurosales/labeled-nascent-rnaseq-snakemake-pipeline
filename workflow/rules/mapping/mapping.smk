@@ -24,10 +24,10 @@ rule ngm_mapPE:
         '../../envs/raw_processing/slamdunk.yaml'
     shell:
         """
-            ngm -b -r {input.ref_genome}\
+            ngm -b -r {input.ref_genome} -p\
             -1 {input.fq_trimmed_1}\
             -2 {input.fq_trimmed_2}\
-            -t {threads} --no-progress --slam-seq 2 -5 12\
+            -t {threads} --no-progress --slam-seq 2\
             --rg-id {params.label} --rg-sm {params.label}:NA:-1\
             -o {output.mapBAM} > {log}  2>&1
         """
