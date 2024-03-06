@@ -61,17 +61,18 @@ TARGETS = {'raw_seq': [],
             'trimmed': [],
             'slam_map': [],
             'slam_filter': [],
-            'deeptools': [],
             'slam_snp': [],
             'slam_count': [],
             'alley_collapse': [],
             'gene_counts': [],
+            'alley_readseparator': [],
+            'deeptools': [],
             'alley_rates': [],
             'alley_utrrates': [],
             'alley_snpeval': [],
             'alley_tcperreadpos': [],
             'alley_tcperutrpos': [],
-            'summary': [],
+            # 'summary': [],
             'merge': []
             }
 
@@ -91,11 +92,12 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
             TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
             TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam'))
-            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_fwd.bw'))
-            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_rev.bw'))
             TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_snp.vcf'))
             TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount.tsv'))
              # --------- Downstream analysis
+            TARGETS['alley_readseparator'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_TCReads.bam'))
+            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_fwd.bw'))
+            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_rev.bw'))
             TARGETS['alley_collapse'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount_collapsed.csv'))
             TARGETS['alley_rates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_overallrates.csv'))
             TARGETS['alley_utrrates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_mutationrates_utr.csv'))
@@ -110,11 +112,13 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
             TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
             TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam'))
-            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_fwd.bw'))
-            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_rev.bw'))
             TARGETS['slam_snp'].append(str(RESULTS_DIR / 'variant_call' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_snp.vcf'))
             TARGETS['slam_count'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount.tsv'))
              # --------- Downstream analysis
+            TARGETS['alley_readseparator'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_backgroundReads.bam'))
+            TARGETS['alley_readseparator'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_TCReads.bam'))
+            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_fwd.bw'))
+            TARGETS['deeptools'].append(str(RESULTS_DIR / 'bigwig_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_coverage_rev.bw'))
             TARGETS['alley_collapse'].append(str(RESULTS_DIR / 'counts' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_tcount_collapsed.csv'))
             TARGETS['alley_rates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_overallrates.csv'))
             TARGETS['alley_utrrates'].append(str(RESULTS_DIR / 'conversion_rates' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered_mutationrates_utr.csv'))
@@ -125,7 +129,7 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
 
 
 # --------- All samples 
-TARGETS['summary'].append(str(RESULTS_DIR / 'quality_control' / 'summary' / 'slamseq_summary.txt'))
+# TARGETS['summary'].append(str(RESULTS_DIR / 'quality_control' / 'summary' / 'slamseq_summary.txt'))
 TARGETS['merge'].append(str(RESULTS_DIR / 'counts' / 'count_matrix' / 'TotalReadCount_mtx.tsv'))
 TARGETS['merge'].append(str(RESULTS_DIR / 'counts' / 'count_matrix' / 'TcReadCount_mtx.tsv'))
 TARGETS['merge'].append(str(RESULTS_DIR / 'counts' / 'count_matrix' / 'TcReadCount_to_TotalReadCount_mtx.tsv'))
@@ -144,6 +148,7 @@ include: 'rules/external_data/annotation_tables.smk'
 include: 'rules/counts/collapse_counts.smk'
 
 # --------- Downstream analysis
+include: 'rules/downstream/read_separator.smk'
 include: 'rules/downstream/deeptools.smk'
 include: 'rules/downstream/conversion_rates.smk'
 include: 'rules/downstream/read_content_qc.smk'
@@ -165,7 +170,8 @@ rule multiqc_report:
         TARGETS['alley_utrrates'],
         TARGETS['alley_snpeval'],
         TARGETS['alley_tcperreadpos'],
-        TARGETS['alley_tcperutrpos']
+        TARGETS['alley_tcperutrpos'],
+        TARGETS['alley_readseparator']
         # TARGETS['summary']
     output:
         base = directory(str(REPORT_DIR / 'multiqc'))
@@ -199,6 +205,7 @@ rule all:
         TARGETS['alley_snpeval'],
         TARGETS['alley_tcperreadpos'],
         TARGETS['alley_tcperutrpos'],
+        TARGETS['alley_readseparator'],
         # TARGETS['summary'],
         TARGETS['merge'],
         str(REPORT_DIR / 'multiqc')

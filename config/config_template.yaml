@@ -41,7 +41,7 @@ SLAM:
 
 # --------------------------- Params for downstream analysis ---------------------------- #
 BAM_COVERAGE:
-    BIN_SIZE: 1 # (default 50)
+    BIN_SIZE: 10 # (default 50)
     # SMOOTH_LENGTH: 10
     MIN_MAPQ: 20
     NORM_METHOD: 'None' # options: RPKM, CPM, BPM, RPGC, None
