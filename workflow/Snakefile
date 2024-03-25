@@ -58,6 +58,7 @@ GENCODE_VERSIONS = {
 # Output files dictionary
 TARGETS = {'raw_seq': [], 
             'merged_fq': [],
+            'fastqc_raw': [],
             'trimmed': [],
             'slam_map': [],
             'slam_filter': [],
@@ -89,6 +90,7 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             # --------- Raw procesing
             TARGETS['raw_seq'].append(str(FASTQ_DIR / 'raw'/ f'{identifier}_S{handle}_L001_R2_001.fastq.gz'))
             TARGETS['merged_fq'].append(str(FASTQ_DIR / 'merged'/ f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R2.fq.gz'))
+            TARGETS['fastqc_raw'].append(expand('results/quality_control/raw_fastq/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}_R{read}_fastqc.html', sample_type=sample_type, treatment=treatment, bio_rep=bio_rep, read=[1,2]))
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
             TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
             TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam'))
@@ -109,6 +111,7 @@ for sample_type, treatment, bio_rep in SAMPLES.index:
             # --------- Raw procesing
             TARGETS['raw_seq'].append(str(FASTQ_DIR / 'raw'/ f'{identifier}_S{handle}_L001_R2_001.fastq.gz'))
             TARGETS['merged_fq'].append(str(FASTQ_DIR / 'merged'/ f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R2.fq.gz'))
+            TARGETS['fastqc_raw'].append(expand('results/quality_control/raw_fastq/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}_R{read}_fastqc.html', sample_type=sample_type, treatment=treatment, bio_rep=bio_rep, read=[1,2]))
             TARGETS['trimmed'].append(str(RESULTS_DIR / 'fastq' / 'trimmed' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_R1.fq.gz_trimming_report.txt'))
             TARGETS['slam_map'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}.bam'))
             TARGETS['slam_filter'].append(str(RESULTS_DIR / 'bam_files' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}' / f'{sample_type}_{treatment}_Bio-rep_{bio_rep}_filtered.bam'))
@@ -160,6 +163,7 @@ include: 'rules/downstream/read_content_qc.smk'
 
 rule multiqc_report:
     input:
+        TARGETS['fastqc_raw'],
         TARGETS['trimmed'],
         TARGETS['slam_map'],
         TARGETS['slam_filter'],
@@ -193,6 +197,7 @@ rule all:
         # expand('resources/external/gencode_{release}/{genome}.genome.fa.gz', release=GENCODE_RELEASE, genome=GENOME),
         # TARGETS['raw_seq'],
         # TARGETS['merged_fq']
+        TARGETS['fastqc_raw'],
         TARGETS['trimmed'],
         TARGETS['slam_map'],
         TARGETS['slam_filter'],
