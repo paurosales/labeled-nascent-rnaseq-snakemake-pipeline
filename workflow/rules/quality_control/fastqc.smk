@@ -1,4 +1,4 @@
-rule fastqc:
+rule fastqc_raw_reads:
     input:
         'resources/fastq_seq/merged/{sample_type}_{treatment}_Bio-rep_{bio_rep}/{sample_type}_{treatment}_Bio-rep_{bio_rep}_R{read}.fq.gz'
     output:
